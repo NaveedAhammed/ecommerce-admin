@@ -12,20 +12,18 @@ import { Provider } from "react-redux";
 import { store } from "./redux/store.ts";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <AdminContextProvider>
-      <Provider store={store}>
-        <ManageProductContextProvider>
-          <ManageColorContextProvider>
-            <ManageCategoryContextProvider>
-              <ManageSizeContextProvider>
-                <Toaster />
-                <App />
-              </ManageSizeContextProvider>
-            </ManageCategoryContextProvider>
-          </ManageColorContextProvider>
-        </ManageProductContextProvider>
-      </Provider>
-    </AdminContextProvider>
-  </React.StrictMode>
+	<AdminContextProvider>
+		<Provider store={store}>
+			<ManageProductContextProvider>
+				<ManageColorContextProvider>
+					<ManageCategoryContextProvider>
+						<ManageSizeContextProvider>
+							<Toaster />
+							<App />
+						</ManageSizeContextProvider>
+					</ManageCategoryContextProvider>
+				</ManageColorContextProvider>
+			</ManageProductContextProvider>
+		</Provider>
+	</AdminContextProvider>
 );
