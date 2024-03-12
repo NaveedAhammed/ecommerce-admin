@@ -5,62 +5,69 @@ import { Category } from "./categorySlice";
 import { Image } from "../../context/ManageProductContext";
 
 export interface Product {
-  _id: string;
-  title: string;
-  description: string;
-  price: number | string;
-  discount: number | string;
-  stock: number | string;
-  images: Image[];
-  category: Category;
-  color: Color;
-  size: Size;
-  featured: boolean;
-  createdAt: string;
+	_id: string;
+	title: string;
+	description: string;
+	price: number | string;
+	discount: number | string;
+	stock: number | string;
+	images: Image[];
+	category: Category;
+	color: Color;
+	size: Size;
+	featured: boolean;
+	createdAt: string;
 }
 
 interface ProductsState {
-  products: Product[];
-  isLoading: boolean;
-  pageNum: number;
+	products: Product[];
+	isLoading: boolean;
+	pageNum: number;
 }
 
 const initialState: ProductsState = {
-  products: [],
-  isLoading: false,
-  pageNum: 1,
+	products: [],
+	isLoading: false,
+	pageNum: 1,
 };
 
 const productSlice = createSlice({
-  name: "product",
-  initialState,
-  reducers: {
-    setProducts(state, action) {
-      state.products = action.payload;
-    },
-    setLoading(state, action) {
-      state.isLoading = action.payload;
-    },
-    addProduct(state, action) {
-      state.products.push(action.payload);
-    },
-    removeProduct(state, action) {
-      state.products = state.products.filter(
-        (product) => product._id !== action.payload
-      );
-    },
-    setPageNum(state, action) {
-      state.pageNum = action.payload;
-    },
-  },
+	name: "product",
+	initialState,
+	reducers: {
+		setProducts(state, action) {
+			state.products = action.payload;
+		},
+		setLoading(state, action) {
+			state.isLoading = action.payload;
+		},
+		addProduct(state, action) {
+			state.products.push(action.payload);
+		},
+		removeProduct(state, action) {
+			state.products = state.products.filter(
+				(product) => product._id !== action.payload
+			);
+		},
+		setPageNum(state, action) {
+			state.pageNum = action.payload;
+		},
+		updateProduct(state, action) {
+			const index = state.products.findIndex(
+				(item) => item._id === action.payload._id
+			);
+			state.products[index] = action.payload;
+		},
+	},
 });
 
 export const {
-  setProducts,
-  setLoading,
-  addProduct,
-  removeProduct,
-  setPageNum,
+	setProducts,
+	setLoading,
+	addProduct,
+	removeProduct,
+	setPageNum,
+	updateProduct,
 } = productSlice.actions;
 
 export default productSlice.reducer;
