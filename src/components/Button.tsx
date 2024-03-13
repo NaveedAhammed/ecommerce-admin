@@ -37,14 +37,14 @@ const Button: React.FC<ButtonProps> = ({
       break;
     case "outline":
       varientClasses =
-        "border border-input bg-background hover:bg-accent hover:text-accent-foreground";
+        "border border-input bg-background hover:bg-accent hover:text-accentForeground";
       break;
     case "secondary":
       varientClasses =
-        "bg-secondary text-secondary-foreground hover:bg-secondary/80";
+        "bg-secondary text-secondaryForeground hover:bg-secondary/80";
       break;
     case "ghost":
-      varientClasses = "hover:bg-accent hover:text-accent-foreground";
+      varientClasses = "hover:bg-accent hover:text-accentForeground";
       break;
     case "link":
       varientClasses = "text-primary underline-offset-4 hover:underline";
