@@ -1,15 +1,21 @@
 import { createContext, useState } from "react";
-
-export type CatagoryType = {
-  name: string;
-};
+import { CategoryType } from "../types";
 
 export type ManageCategoryContextType = {
   isOpen: boolean;
   onOpen: () => void;
   onClose: () => void;
-  data: CatagoryType;
-  setData: (data: CatagoryType) => void;
+  data: CategoryType;
+  setData: (data: CategoryType) => void;
+  editMode: boolean;
+  setEditMode: (value: boolean) => void;
+};
+
+const defaultState: CategoryType = {
+  _id: "",
+  name: "",
+  createdAt: "",
+  updatedAt: "",
 };
 
 export const ManageCategoryContext =
@@ -19,9 +25,12 @@ export const ManageCategoryContextProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const [open, setOpen] = useState<boolean>(false);
-  const [data, setData] = useState<CatagoryType>({
-    name: "",
-  });
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [data, setData] = useState<CategoryType>(defaultState);
+
+  const handleSetEditMode = (value: boolean) => {
+    setIsEditing(value);
+  };
 
   const handleOpen = () => {
     setOpen(true);
@@ -29,10 +38,10 @@ export const ManageCategoryContextProvider: React.FC<{
 
   const handleClose = () => {
     setOpen(false);
-    setData({ name: "" });
+    setData(defaultState);
   };
 
-  const handleSetData = (data: CatagoryType) => {
+  const handleSetData = (data: CategoryType) => {
     setData(data);
   };
 
@@ -44,6 +53,8 @@ export const ManageCategoryContextProvider: React.FC<{
         onClose: handleClose,
         data,
         setData: handleSetData,
+        editMode: isEditing,
+        setEditMode: handleSetEditMode,
       }}
     >
       {children}

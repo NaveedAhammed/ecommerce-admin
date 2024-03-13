@@ -1,4 +1,5 @@
-import { AdminContextType, IAdmin } from "../context/AdminContext";
+import { AdminContextType } from "../context/AdminContext";
+import { AdminType } from "../types";
 import { privateAxios } from "../utils/axios";
 import useAdminContext from "./useAdminContext";
 
@@ -9,7 +10,7 @@ const useRefreshToken = () => {
     const res = (await privateAxios.get("/refresh")).data;
     console.log(res);
     const { user, accessToken } = res.data;
-    const admin: IAdmin = {
+    const admin: AdminType = {
       username: user.username,
       avatar: user?.avatar,
       accessToken,

@@ -1,36 +1,39 @@
 import { createSlice } from "@reduxjs/toolkit";
-
-export interface Color {
-	_id: string;
-	name: string;
-	value: string;
-	createdAt: string;
-	updatedAt: string;
-}
+import { ColorType } from "../../types";
 
 interface ColorsState {
-	colors: Color[];
-	isLoading: boolean;
+  colors: ColorType[];
+  isLoading: boolean;
 }
 
 const initialState: ColorsState = {
-	colors: [],
-	isLoading: false,
+  colors: [],
+  isLoading: false,
 };
 
-const sizeSlice = createSlice({
-	name: "color",
-	initialState,
-	reducers: {
-		setColors(state, action) {
-			state.colors = action.payload;
-		},
-		setLoading(state, action) {
-			state.isLoading = action.payload;
-		},
-	},
+const colorSlice = createSlice({
+  name: "color",
+  initialState,
+  reducers: {
+    setColors(state, action) {
+      state.colors = action.payload;
+    },
+    setLoading(state, action) {
+      state.isLoading = action.payload;
+    },
+    removeColor(state, action) {
+      state.colors = state.colors.filter((item) => item._id !== action.payload);
+    },
+    updateColor(state, action) {
+      const indexOfColor = state.colors.findIndex(
+        (item) => item._id === action.payload._id
+      );
+      state.colors[indexOfColor] = action.payload;
+    },
+  },
 });
 
-export const { setColors, setLoading } = sizeSlice.actions;
+export const { setColors, setLoading, updateColor, removeColor } =
+  colorSlice.actions;
 
-export default sizeSlice.reducer;
+export default colorSlice.reducer;

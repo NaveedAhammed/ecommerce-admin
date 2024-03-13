@@ -10,8 +10,9 @@ import { privateAxios } from "../utils/axios";
 import { AxiosError } from "axios";
 import toast from "react-hot-toast";
 import useAdminContext from "../hooks/useAdminContext";
-import { AdminContextType, IAdmin } from "../context/AdminContext";
+import { AdminContextType } from "../context/AdminContext";
 import { useNavigate } from "react-router-dom";
+import { AdminType } from "../types";
 
 const Login = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
@@ -46,7 +47,7 @@ const Login = () => {
           return toast.error("Login failed, Please try again");
         }
         const { user, accessToken } = res.data;
-        const admin: IAdmin = {
+        const admin: AdminType = {
           username: user.username,
           accessToken,
           id: user.id,

@@ -1,44 +1,42 @@
 import { createSlice } from "@reduxjs/toolkit";
-
-export interface Size {
-	_id: string;
-	name: string;
-	value: string;
-	createdAt: string;
-	updatedAt: string;
-}
+import { SizeType } from "../../types";
 
 interface SizesState {
-	sizes: Size[];
-	isLoading: boolean;
+  sizes: SizeType[];
+  isLoading: boolean;
 }
 
 const initialState: SizesState = {
-	sizes: [],
-	isLoading: false,
+  sizes: [],
+  isLoading: false,
 };
 
 const sizeSlice = createSlice({
-	name: "size",
-	initialState,
-	reducers: {
-		setSizes(state, action) {
-			state.sizes = action.payload;
-		},
-		setLoading(state, action) {
-			state.isLoading = action.payload;
-		},
-		addSize(state, action) {
-			state.sizes.push(action.payload);
-		},
-		removeSize(state, action) {
-			state.sizes = state.sizes.filter(
-				(size) => size._id !== action.payload
-			);
-		},
-	},
+  name: "size",
+  initialState,
+  reducers: {
+    setSizes(state, action) {
+      state.sizes = action.payload;
+    },
+    setLoading(state, action) {
+      state.isLoading = action.payload;
+    },
+    addSize(state, action) {
+      state.sizes.push(action.payload);
+    },
+    removeSize(state, action) {
+      state.sizes = state.sizes.filter((item) => item._id !== action.payload);
+    },
+    updateSize(state, action) {
+      const indexOfSize = state.sizes.findIndex(
+        (item) => item._id === action.payload._id
+      );
+      state.sizes[indexOfSize] = action.payload;
+    },
+  },
 });
 
-export const { setSizes, setLoading, addSize, removeSize } = sizeSlice.actions;
+export const { setSizes, setLoading, addSize, removeSize, updateSize } =
+  sizeSlice.actions;
 
 export default sizeSlice.reducer;

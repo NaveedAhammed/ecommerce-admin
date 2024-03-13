@@ -1,9 +1,5 @@
 import { createContext, useState } from "react";
-
-export type ColorType = {
-  name: string;
-  value: string;
-};
+import { ColorType } from "../types";
 
 export type ManageColorContextType = {
   isOpen: boolean;
@@ -11,6 +7,16 @@ export type ManageColorContextType = {
   onClose: () => void;
   data: ColorType;
   setData: (data: ColorType) => void;
+  editMode: boolean;
+  setEditMode: (value: boolean) => void;
+};
+
+const defaultState: ColorType = {
+  _id: "",
+  name: "",
+  value: "",
+  createdAt: "",
+  updatedAt: "",
 };
 
 export const ManageColorContext = createContext<ManageColorContextType | null>(
@@ -21,10 +27,12 @@ export const ManageColorContextProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const [open, setOpen] = useState<boolean>(false);
-  const [data, setData] = useState<ColorType>({
-    name: "",
-    value: "",
-  });
+  const [data, setData] = useState<ColorType>(defaultState);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const handleSetEditMode = (value: boolean) => {
+    setIsEditing(value);
+  };
 
   const handleOpen = () => {
     setOpen(true);
@@ -32,7 +40,7 @@ export const ManageColorContextProvider: React.FC<{
 
   const handleClose = () => {
     setOpen(false);
-    setData({ name: "", value: "" });
+    setData(defaultState);
   };
 
   const handleSetData = (data: ColorType) => {
@@ -47,6 +55,8 @@ export const ManageColorContextProvider: React.FC<{
         onClose: handleClose,
         setData: handleSetData,
         data,
+        editMode: isEditing,
+        setEditMode: handleSetEditMode,
       }}
     >
       {children}

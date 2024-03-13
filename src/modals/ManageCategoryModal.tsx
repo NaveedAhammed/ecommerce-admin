@@ -11,15 +11,19 @@ import toast from "react-hot-toast";
 import { AxiosError } from "axios";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
+import { useAppDispatch } from "../redux/store";
+import { updateCategory } from "../redux/slices/categorySlice";
 
 const ManageCategoryModal = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasNameFocused, setHasNameFocused] = useState<boolean>(false);
   const [hasNameBlured, setHasNameBlured] = useState<boolean>(false);
-  const { isOpen, onClose, data } =
+  const { isOpen, onClose, data, editMode } =
     useManageCategoryContext() as ManageCategoryContextType;
 
   const axiosPrivate = useAxiosPrivate();
+
+  const dispatch = useAppDispatch();
 
   const firstInputRef = useRef<HTMLInputElement>(null);
   const errorBarRef = useRef<HTMLParagraphElement>(null);
@@ -34,16 +38,17 @@ const ManageCategoryModal = () => {
     resetState();
   };
 
-  const handleShowError = (msg: string) => {
-    if (errorBarRef.current) {
-      errorBarRef.current.innerText = msg;
-      errorBarRef.current.style.display = "block";
-    }
-    setTimeout(() => {
-      if (errorBarRef.current) {
-        errorBarRef.current.style.display = "none";
-      }
-    }, 4000);
+  const handleCreateCategory = async (formData: FormData) => {
+    const res = (await axiosPrivate.post("/category/new", formData)).data;
+    return res;
+  };
+
+  const handleUpdateCategory = async (formData: FormData) => {
+    const res = (
+      await axiosPrivate.put(`/category/update/${data._id}`, formData)
+    ).data;
+    dispatch(updateCategory(res.data.category));
+    return res;
   };
 
   const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -58,10 +63,15 @@ const ManageCategoryModal = () => {
       const formData = new FormData(formElement);
       try {
         setIsLoading(true);
-        const res = (await axiosPrivate.post("/category/new", formData)).data;
+        let res;
+        if (editMode) {
+          res = await handleUpdateCategory(formData);
+        } else {
+          res = await handleCreateCategory(formData);
+        }
         console.log(res);
         if (!res.success) {
-          return handleShowError("Category creation failed, Please try again");
+          return toast.error("Category creation failed, Please try again");
         }
         if (res.success) {
           onClose();
@@ -73,9 +83,9 @@ const ManageCategoryModal = () => {
         const error = err as AxiosError;
         console.log(error);
         if (!error?.response) {
-          return handleShowError("Something went wrong");
+          return toast.error("Something went wrong");
         } else {
-          return handleShowError(`${error.response?.data?.message}`);
+          return toast.error(`${error.response?.data?.message}`);
         }
       } finally {
         setIsLoading(false);

@@ -1,9 +1,5 @@
 import { createContext, useState } from "react";
-
-export type SizeType = {
-  name: string;
-  value: string;
-};
+import { SizeType } from "../types";
 
 export type ManageSizeContextType = {
   isOpen: boolean;
@@ -11,6 +7,16 @@ export type ManageSizeContextType = {
   onClose: () => void;
   setData: (size: SizeType) => void;
   data: SizeType;
+  editMode: boolean;
+  setEditMode: (value: boolean) => void;
+};
+
+const defaultState: SizeType = {
+  _id: "",
+  name: "",
+  value: "",
+  createdAt: "",
+  updatedAt: "",
 };
 
 export const ManageSizeContext = createContext<ManageSizeContextType | null>(
@@ -21,7 +27,12 @@ export const ManageSizeContextProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const [open, setOpen] = useState<boolean>(false);
-  const [data, setData] = useState<SizeType>({ name: "", value: "" });
+  const [data, setData] = useState<SizeType>(defaultState);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const handleSetEditMode = (value: boolean) => {
+    setIsEditing(value);
+  };
 
   const handleOpen = () => {
     setOpen(true);
@@ -29,7 +40,7 @@ export const ManageSizeContextProvider: React.FC<{
 
   const handleClose = () => {
     setOpen(false);
-    setData({ name: "", value: "" });
+    setData(defaultState);
   };
 
   const handleSetData = (size: SizeType) => {
@@ -44,6 +55,8 @@ export const ManageSizeContextProvider: React.FC<{
         onClose: handleClose,
         data,
         setData: handleSetData,
+        editMode: isEditing,
+        setEditMode: handleSetEditMode,
       }}
     >
       {children}

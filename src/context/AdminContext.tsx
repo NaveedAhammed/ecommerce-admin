@@ -1,23 +1,17 @@
 import { createContext, useState } from "react";
-
-export interface IAdmin {
-  username: string;
-  avatar?: string | undefined;
-  accessToken: string;
-  id: string;
-}
+import { AdminType } from "../types";
 
 export type AdminContextType = {
-  adminState: IAdmin | null;
-  setAdmin: (admin: IAdmin) => void;
+  adminState: AdminType | null;
+  setAdmin: (admin: AdminType) => void;
 };
 
 export const AdminContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [adminState, setAdminState] = useState<IAdmin | null>(null);
+  const [adminState, setAdminState] = useState<AdminType | null>(null);
 
-  const setAdmin = (admin: IAdmin) => {
+  const setAdmin = (admin: AdminType) => {
     setAdminState(admin);
   };
 

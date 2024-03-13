@@ -11,6 +11,8 @@ import Loader from "../components/Loader";
 import Message from "../components/Message";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import ErrorBar from "../components/ErrorBar";
+import { updateColor } from "../redux/slices/colorSlice";
+import { useAppDispatch } from "../redux/store";
 
 const ManageColorModal = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -18,13 +20,15 @@ const ManageColorModal = () => {
   const [hasNameBlured, setHasNameBlured] = useState<boolean>(false);
   const [hasValueFocused, setHasValueFocused] = useState<boolean>(false);
   const [hasValueBlured, setHasValueBlured] = useState<boolean>(false);
-  const { isOpen, onClose, data } =
+  const { isOpen, onClose, data, editMode } =
     useManageColorContext() as ManageColorContextType;
 
   const firstInputRef = useRef<HTMLInputElement>(null);
   const errorBarRef = useRef<HTMLParagraphElement>(null);
 
   const axiosPrivate = useAxiosPrivate();
+
+  const dispatch = useAppDispatch();
 
   const resetState = () => {
     setHasNameBlured(false);
@@ -38,16 +42,16 @@ const ManageColorModal = () => {
     resetState();
   };
 
-  const handleShowError = (msg: string) => {
-    if (errorBarRef.current) {
-      errorBarRef.current.innerText = msg;
-      errorBarRef.current.style.display = "block";
-    }
-    setTimeout(() => {
-      if (errorBarRef.current) {
-        errorBarRef.current.style.display = "none";
-      }
-    }, 4000);
+  const handleCreateColor = async (formData: FormData) => {
+    const res = (await axiosPrivate.post("/color/new", formData)).data;
+    return res;
+  };
+
+  const handleUpdateColor = async (formData: FormData) => {
+    const res = (await axiosPrivate.put(`/color/update/${data._id}`, formData))
+      .data;
+    dispatch(updateColor(res.data.color));
+    return res;
   };
 
   const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -62,10 +66,15 @@ const ManageColorModal = () => {
       const formData = new FormData(formElement);
       try {
         setIsLoading(true);
-        const res = (await axiosPrivate.post("/color/new", formData)).data;
+        let res;
+        if (editMode) {
+          res = await handleUpdateColor(formData);
+        } else {
+          res = await handleCreateColor(formData);
+        }
         console.log(res);
         if (!res.success) {
-          return handleShowError("Color creation failed, Please try again");
+          return toast.error("Color creation failed, Please try again");
         }
         if (res.success) {
           onClose();
@@ -77,9 +86,9 @@ const ManageColorModal = () => {
         const error = err as AxiosError;
         console.log(error);
         if (!error?.response) {
-          return handleShowError("Something went wrong");
+          return toast.error("Something went wrong");
         } else {
-          return handleShowError(`${error.response?.data?.message}`);
+          return toast.error(`${error.response?.data?.message}`);
         }
       } finally {
         setIsLoading(false);
@@ -141,15 +150,28 @@ const ManageColorModal = () => {
         <Button onClick={handleCancel} size="default" varient="outline">
           Cancel
         </Button>
-        <Button
-          type="submit"
-          size="default"
-          varient="default"
-          className="gap-2"
-        >
-          {isLoading && <Loader width="1rem" height="1rem" color="white" />}
-          Create
-        </Button>
+        {!editMode && (
+          <Button
+            size="default"
+            varient="default"
+            type="submit"
+            className="gap-2"
+          >
+            {isLoading && <Loader width="1rem" height="1rem" color="white" />}
+            {isLoading ? "Creating..." : "Create"}
+          </Button>
+        )}
+        {editMode && (
+          <Button
+            size="default"
+            varient="default"
+            type="submit"
+            className="gap-2"
+          >
+            {isLoading && <Loader width="1rem" height="1rem" color="white" />}
+            {isLoading ? "Updating..." : "Update"}
+          </Button>
+        )}
       </div>
     </form>
   );
