@@ -3,8 +3,6 @@ import Input from "../components/Input";
 import Label from "../components/Label";
 import Modal from "../components/Modal";
 import Select from "../components/Select";
-import { ManageProductContextType } from "../context/ManageProductContext";
-import { useManageProductContext } from "../hooks/useManageProductContext";
 import { MdDeleteOutline } from "react-icons/md";
 
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
@@ -15,7 +13,9 @@ import { AxiosError } from "axios";
 import Loader from "../components/Loader";
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import {
-	removeProductImage,
+	setIsProductModalOpen,
+	setProductData,
+	setProductEditMode,
 	updateProduct,
 } from "../redux/slices/productSlice";
 
@@ -55,8 +55,10 @@ const ManageProductModal = () => {
 	const { colors } = useAppSelector((state) => state.colors);
 	const { sizes } = useAppSelector((state) => state.sizes);
 	const { categories } = useAppSelector((state) => state.categories);
-	const { isOpen, onClose, data, editMode, setEditMode, removeImage } =
-		useManageProductContext() as ManageProductContextType;
+
+	const { isProductModalOpen, productData, editMode } = useAppSelector(
+		(state) => state.products
+	);
 
 	const axiosPrivate = useAxiosPrivate();
 
@@ -101,8 +103,9 @@ const ManageProductModal = () => {
 	};
 
 	const handleCancel = () => {
-		onClose();
-		setEditMode(false);
+		dispatch(setIsProductModalOpen(false));
+		dispatch(setProductData(null));
+		dispatch(setProductEditMode(false));
 		resetState();
 	};
 
@@ -136,7 +139,7 @@ const ManageProductModal = () => {
 
 	const handleDeleteServerImage = async (imageId: string) => {
 		const res = axiosPrivate.delete(
-			`/product/image/delete/${data?._id}?imageId=${imageId}`
+			`/product/image/delete/${productData?._id}?imageId=${imageId}`
 		);
 		toast.promise(res, {
 			loading: "Deleting the image...",
@@ -170,11 +173,15 @@ const ManageProductModal = () => {
 
 	const handleUpdateProduct = async (formData: FormData) => {
 		const res = (
-			await axiosPrivate.put(`/product/update/${data?._id}`, formData, {
-				headers: {
-					"Content-Type": "multipart/form-data",
-				},
-			})
+			await axiosPrivate.put(
+				`/product/update/${productData?._id}`,
+				formData,
+				{
+					headers: {
+						"Content-Type": "multipart/form-data",
+					},
+				}
+			)
 		).data;
 		dispatch(updateProduct(res.data.product));
 		return res;
@@ -209,7 +216,7 @@ const ManageProductModal = () => {
 					);
 				}
 				if (res.success) {
-					onClose();
+					dispatch(setIsProductModalOpen(false));
 					resetState();
 					setImages([]);
 					return toast.success(res.message);
@@ -239,7 +246,7 @@ const ManageProductModal = () => {
 				<Label htmlFor="title">Title</Label>
 				<Input
 					id="title"
-					defaultValue={data.title}
+					defaultValue={productData?.title}
 					autoComplete="off"
 					name="title"
 					type="text"
@@ -264,7 +271,7 @@ const ManageProductModal = () => {
 				<Input
 					id="price"
 					autoComplete="off"
-					defaultValue={data.price}
+					defaultValue={productData?.price}
 					name="price"
 					required={true}
 					className="peer"
@@ -286,7 +293,7 @@ const ManageProductModal = () => {
 				<Label htmlFor="stock">Stock</Label>
 				<Input
 					id="stock"
-					defaultValue={data.stock}
+					defaultValue={productData?.stock}
 					autoComplete="off"
 					name="stock"
 					type="number"
@@ -314,7 +321,7 @@ const ManageProductModal = () => {
 						id: category?._id,
 						name: category?.name,
 					}))}
-					defaultValue={data?.category?._id}
+					defaultValue={productData?.category?._id}
 					required={true}
 					className="peer"
 					onBlur={() =>
@@ -345,7 +352,7 @@ const ManageProductModal = () => {
 						id: color?._id,
 						name: color?.name,
 					}))}
-					defaultValue={data.color?._id}
+					defaultValue={productData?.color?._id}
 					required={true}
 					className="peer"
 					onBlur={() =>
@@ -370,7 +377,7 @@ const ManageProductModal = () => {
 						id: size?._id,
 						name: size?.name,
 					}))}
-					defaultValue={data?.size?._id}
+					defaultValue={productData?.size?._id}
 					className="peer"
 					required={true}
 					onBlur={() =>
@@ -390,7 +397,7 @@ const ManageProductModal = () => {
 				<Label htmlFor="stock">Discount</Label>
 				<Input
 					id="discount"
-					defaultValue={data.discount}
+					defaultValue={productData?.discount}
 					autoComplete="off"
 					name="discount"
 					type="number"
@@ -400,7 +407,7 @@ const ManageProductModal = () => {
 				<div className="flex flex-col gap-1">
 					<Label htmlFor="size">Old images</Label>
 					<div className="flex items-center gap-1 py-2">
-						{data.images?.map((img) => (
+						{productData?.images?.map((img) => (
 							<div
 								className="w-10 h-12 relative rounded-md overflow-hidden group border"
 								key={img?._id}
@@ -482,7 +489,7 @@ const ManageProductModal = () => {
 					id="description"
 					rows={5}
 					required={true}
-					defaultValue={data.description}
+					defaultValue={productData?.description}
 					onBlur={() =>
 						setHasInputBlured((prev) => ({
 							...prev,
@@ -509,7 +516,7 @@ const ManageProductModal = () => {
 					name="featured"
 					id="featured"
 					className="mt-2 cursor-pointer"
-					defaultChecked={data.featured}
+					defaultChecked={productData?.featured}
 				/>
 				<Label htmlFor="featured">
 					Featured <br />
@@ -554,12 +561,12 @@ const ManageProductModal = () => {
 
 	useEffect(() => {
 		firstInputRef.current && firstInputRef.current.focus();
-	}, [isOpen]);
+	}, [isProductModalOpen]);
 
 	return (
 		<Modal
-			isOpen={isOpen}
-			onClose={onClose}
+			isOpen={isProductModalOpen}
+			onClose={() => dispatch(setIsProductModalOpen(false))}
 			body={body}
 			title={`${editMode ? "Edit Product" : "Create Product"}`}
 			description={`${

@@ -1,5 +1,4 @@
 import Heading from "../components/Heading";
-import Input from "../components/Input";
 import Table, {
 	TBody,
 	THead,
@@ -8,29 +7,46 @@ import Table, {
 	TRowData,
 } from "../components/Table";
 import TableAction from "../components/TableAction";
-import { ManageSizeContextType } from "../context/ManageSizeContext";
-import { useManageSizeContext } from "../hooks/useManageSizeContext";
 import dayjs from "dayjs";
 import { useAppDispatch, useAppSelector } from "../redux/store";
-import { removeSize } from "../redux/slices/sizeSlice";
+import {
+	removeSize,
+	setIsSizeModalOpen,
+	setSizeData,
+	setSizeEditMode,
+	setSizesPageNum,
+} from "../redux/slices/sizeSlice";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
 import { SizeType } from "../types";
+import { useState } from "react";
+import ControlledInput from "../components/ControlledInput";
+import Button from "../components/Button";
 
 const Sizes = () => {
-	const { onOpen, setData } = useManageSizeContext() as ManageSizeContextType;
+	const { sizes, pageNum, sizesPerPage } = useAppSelector(
+		(state) => state.sizes
+	);
+
+	const [filterQuery, setFilterQuery] = useState<string>("");
+
+	const filteredSizes = sizes
+		.slice(
+			(pageNum - 1) * sizesPerPage,
+			(pageNum - 1) * sizesPerPage + sizesPerPage
+		)
+		.filter((size) => size.name.includes(filterQuery));
 
 	const axiosPrivate = useAxiosPrivate();
 
 	const dispatch = useAppDispatch();
 
 	const handleActionEdit = (data: SizeType) => {
-		setData(data);
-		onOpen();
+		dispatch(setSizeData(data));
+		dispatch(setSizeEditMode(true));
+		dispatch(setIsSizeModalOpen(true));
 	};
-
-	const { sizes } = useAppSelector((state) => state.sizes);
 
 	const handleActionDelete = (size: SizeType) => {
 		const res = axiosPrivate.delete(`/size/delete/${size._id}`);
@@ -52,22 +68,47 @@ const Sizes = () => {
 		});
 	};
 
+	const handlePagination = (dir: string) => {
+		filterQuery && setFilterQuery("");
+		if (dir === "previous") {
+			if (pageNum === 1) return;
+			dispatch(setSizesPageNum(pageNum - 1));
+		} else {
+			dispatch(setSizesPageNum(pageNum + 1));
+		}
+	};
+
 	return (
 		<div className="w-full h-full">
 			<Heading
 				title="Sizes"
 				description="Manage sizes for your products"
-				action={onOpen}
+				action={() => dispatch(setIsSizeModalOpen(true))}
 				actionLabel="Add New"
 			/>
-			<Input
-				autoComplete="off"
-				name="searchQuery"
-				type="text"
-				placeholder="Search"
-				className="mb-4 w-[30rem]"
-				id="searchQuery"
-			/>
+			<div className="flex items-center gap-4 w-full mb-4">
+				<ControlledInput
+					autoComplete="off"
+					name="searchQuery"
+					type="text"
+					placeholder="Search"
+					className="max-w-[30rem]"
+					id="searchQuery"
+					value={filterQuery}
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+						setFilterQuery(e.target.value)
+					}
+				/>
+				{filterQuery && (
+					<Button
+						varient="default"
+						size="default"
+						onClick={() => setFilterQuery("")}
+					>
+						Reset
+					</Button>
+				)}
+			</div>
 			<Table>
 				<THead>
 					<TRow>
@@ -78,7 +119,7 @@ const Sizes = () => {
 					</TRow>
 				</THead>
 				<TBody>
-					{sizes?.map((size) => (
+					{filteredSizes?.map((size) => (
 						<TRow key={size._id}>
 							<TRowData>{size.name}</TRowData>
 							<TRowData>{size.value}</TRowData>
@@ -95,6 +136,25 @@ const Sizes = () => {
 					))}
 				</TBody>
 			</Table>
+			<div className="w-full flex items-center p-4 justify-end gap-3">
+				<Button
+					varient="outline"
+					size="sm"
+					onClick={() => handlePagination("previous")}
+					disabled={pageNum === 1}
+				>
+					Previous
+				</Button>
+				<span>{pageNum}</span>
+				<Button
+					varient="outline"
+					size="sm"
+					onClick={() => handlePagination("next")}
+					disabled={pageNum >= Math.ceil(sizes.length / sizesPerPage)}
+				>
+					Next
+				</Button>
+			</div>
 		</div>
 	);
 };

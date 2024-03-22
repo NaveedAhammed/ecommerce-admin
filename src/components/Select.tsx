@@ -7,7 +7,7 @@ interface SelectProps {
 	options: Option[];
 	name: string;
 	id: string;
-	defaultValue: string;
+	defaultValue?: string;
 	required?: boolean;
 	className?: string;
 	onFocus?: () => void;

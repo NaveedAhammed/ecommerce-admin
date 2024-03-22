@@ -15,61 +15,61 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Sizes = lazy(() => import("./pages/Sizes"));
 
 const router = createBrowserRouter([
-  {
-    element: <AdminLayout />,
-    children: [
-      {
-        element: <PersistLogin />,
-        children: [
-          {
-            element: <ProtectedLayout />,
-            children: [
-              {
-                path: "/",
-                element: <Dashboard />,
-              },
-              {
-                path: "billboards",
-                element: <Billboards />,
-              },
-              {
-                path: "categories",
-                element: <Categories />,
-              },
-              {
-                path: "colors",
-                element: <Colors />,
-              },
-              {
-                path: "sizes",
-                element: <Sizes />,
-              },
-              {
-                path: "products",
-                element: <Products />,
-              },
-              {
-                path: "orders",
-                element: <Orders />,
-              },
-              {
-                path: "settings",
-                element: <Settings />,
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    path: "login",
-    element: <Login />,
-  },
+	{
+		element: <PersistLogin />,
+		children: [
+			{
+				element: <AdminLayout />,
+				children: [
+					{
+						element: <ProtectedLayout />,
+						children: [
+							{
+								path: "/",
+								element: <Dashboard />,
+							},
+							{
+								path: "billboards",
+								element: <Billboards />,
+							},
+							{
+								path: "categories",
+								element: <Categories />,
+							},
+							{
+								path: "colors",
+								element: <Colors />,
+							},
+							{
+								path: "sizes",
+								element: <Sizes />,
+							},
+							{
+								path: "products",
+								element: <Products />,
+							},
+							{
+								path: "orders",
+								element: <Orders />,
+							},
+							{
+								path: "settings",
+								element: <Settings />,
+							},
+						],
+					},
+				],
+			},
+			{
+				path: "login",
+				element: <Login />,
+			},
+		],
+	},
 ]);
 
 const App = () => {
-  return <RouterProvider router={router} />;
+	return <RouterProvider router={router} />;
 };
 
 export default App;

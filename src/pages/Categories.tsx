@@ -1,5 +1,4 @@
 import Heading from "../components/Heading";
-import Input from "../components/Input";
 import Table, {
 	TBody,
 	THead,
@@ -8,29 +7,45 @@ import Table, {
 	TRowData,
 } from "../components/Table";
 import TableAction from "../components/TableAction";
-import { ManageCategoryContextType } from "../context/ManageCategoryContext";
-import { useManageCategoryContext } from "../hooks/useManageCategoryContext";
 import dayjs from "dayjs";
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import { CategoryType } from "../types";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import toast from "react-hot-toast";
-import { removeCategory } from "../redux/slices/categorySlice";
+import {
+	removeCategory,
+	setCategoriesPageNum,
+	setCategoryData,
+	setCategoryEditMode,
+	setCategoryModalOpen,
+} from "../redux/slices/categorySlice";
 import { AxiosError } from "axios";
+import Button from "../components/Button";
+import { useState } from "react";
+import ControlledInput from "../components/ControlledInput";
 
 const Categories = () => {
-	const { onOpen, setData } =
-		useManageCategoryContext() as ManageCategoryContextType;
+	const { categories, categoriesPerPage, pageNum } = useAppSelector(
+		(state) => state.categories
+	);
+
+	const [filterQuery, setFilterQuery] = useState<string>("");
+
+	const filteredCategories = categories
+		.slice(
+			(pageNum - 1) * categoriesPerPage,
+			(pageNum - 1) * categoriesPerPage + categoriesPerPage
+		)
+		.filter((cat) => cat.name.includes(filterQuery));
 
 	const axiosPrivate = useAxiosPrivate();
 
 	const dispatch = useAppDispatch();
 
-	const { categories } = useAppSelector((state) => state.categories);
-
 	const handleActionEdit = (data: CategoryType) => {
-		setData(data);
-		onOpen();
+		dispatch(setCategoryData(data));
+		dispatch(setCategoryEditMode(true));
+		dispatch(setCategoryModalOpen(true));
 	};
 
 	const handleActionDelete = (category: CategoryType) => {
@@ -53,22 +68,47 @@ const Categories = () => {
 		});
 	};
 
+	const handlePagination = (dir: string) => {
+		filterQuery && setFilterQuery("");
+		if (dir === "previous") {
+			if (pageNum === 1) return;
+			dispatch(setCategoriesPageNum(pageNum - 1));
+		} else {
+			dispatch(setCategoriesPageNum(pageNum + 1));
+		}
+	};
+
 	return (
 		<div className="w-full h-full">
 			<Heading
 				title="Categories"
 				description="Manage categories for your products"
-				action={onOpen}
+				action={() => dispatch(setCategoryModalOpen(true))}
 				actionLabel="Add New"
 			/>
-			<Input
-				autoComplete="off"
-				name="searchQuery"
-				type="text"
-				placeholder="Search"
-				className="mb-4 w-[30rem]"
-				id="searchQuery"
-			/>
+			<div className="flex items-center gap-4 w-full mb-4">
+				<ControlledInput
+					autoComplete="off"
+					name="searchQuery"
+					type="text"
+					placeholder="Search"
+					className="max-w-[30rem]"
+					id="searchQuery"
+					value={filterQuery}
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+						setFilterQuery(e.target.value)
+					}
+				/>
+				{filterQuery && (
+					<Button
+						varient="default"
+						size="default"
+						onClick={() => setFilterQuery("")}
+					>
+						Reset
+					</Button>
+				)}
+			</div>
 			<Table>
 				<THead>
 					<TRow>
@@ -78,7 +118,7 @@ const Categories = () => {
 					</TRow>
 				</THead>
 				<TBody>
-					{categories?.map((category) => (
+					{filteredCategories?.map((category) => (
 						<TRow key={category._id}>
 							<TRowData>{category.name}</TRowData>
 							<TRowData>
@@ -94,6 +134,28 @@ const Categories = () => {
 					))}
 				</TBody>
 			</Table>
+			<div className="w-full flex items-center p-4 justify-end gap-3">
+				<Button
+					varient="outline"
+					size="sm"
+					onClick={() => handlePagination("previous")}
+					disabled={pageNum === 1}
+				>
+					Previous
+				</Button>
+				<span>{pageNum}</span>
+				<Button
+					varient="outline"
+					size="sm"
+					onClick={() => handlePagination("next")}
+					disabled={
+						pageNum >=
+						Math.ceil(categories.length / categoriesPerPage)
+					}
+				>
+					Next
+				</Button>
+			</div>
 		</div>
 	);
 };

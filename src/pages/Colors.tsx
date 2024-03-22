@@ -1,5 +1,4 @@
 import Heading from "../components/Heading";
-import Input from "../components/Input";
 import Table, {
 	TBody,
 	THead,
@@ -7,30 +6,46 @@ import Table, {
 	TRow,
 	TRowData,
 } from "../components/Table";
-import { ManageColorContextType } from "../context/ManageColorContext";
-import { useManageColorContext } from "../hooks/useManageColorContext";
 import TableAction from "../components/TableAction";
 import dayjs from "dayjs";
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import { ColorType } from "../types";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import toast from "react-hot-toast";
-import { removeColor } from "../redux/slices/colorSlice";
+import {
+	removeColor,
+	setColorData,
+	setColorEditMode,
+	setColorsPageNum,
+	setIsColorModalOpen,
+} from "../redux/slices/colorSlice";
 import { AxiosError } from "axios";
+import { useState } from "react";
+import Button from "../components/Button";
+import ControlledInput from "../components/ControlledInput";
 
 const Colors = () => {
-	const { onOpen, setData } =
-		useManageColorContext() as ManageColorContextType;
+	const { colors, pageNum, colorsPerPage } = useAppSelector(
+		(state) => state.colors
+	);
 
-	const { colors } = useAppSelector((state) => state.colors);
+	const [filterQuery, setFilterQuery] = useState<string>("");
+
+	const filteredColors = colors
+		.slice(
+			(pageNum - 1) * colorsPerPage,
+			(pageNum - 1) * colorsPerPage + colorsPerPage
+		)
+		.filter((color) => color.name.includes(filterQuery));
 
 	const axiosPrivate = useAxiosPrivate();
 
 	const dispatch = useAppDispatch();
 
 	const handleActionEdit = (data: ColorType) => {
-		setData(data);
-		onOpen();
+		dispatch(setColorData(data));
+		dispatch(setColorEditMode(true));
+		dispatch(setIsColorModalOpen(true));
 	};
 
 	const handleActionDelete = (color: ColorType) => {
@@ -53,22 +68,47 @@ const Colors = () => {
 		});
 	};
 
+	const handlePagination = (dir: string) => {
+		filterQuery && setFilterQuery("");
+		if (dir === "previous") {
+			if (pageNum === 1) return;
+			dispatch(setColorsPageNum(pageNum - 1));
+		} else {
+			dispatch(setColorsPageNum(pageNum + 1));
+		}
+	};
+
 	return (
 		<div className="h-full">
 			<Heading
 				title="Colors"
 				description="Manage colors for your products"
-				action={onOpen}
+				action={() => dispatch(setIsColorModalOpen(true))}
 				actionLabel="Add New"
 			/>
-			<Input
-				autoComplete="off"
-				name="searchQuery"
-				type="text"
-				placeholder="Search"
-				className="mb-4 w-[30rem]"
-				id="searchQuery"
-			/>
+			<div className="flex items-center gap-4 w-full mb-4">
+				<ControlledInput
+					autoComplete="off"
+					name="searchQuery"
+					type="text"
+					placeholder="Search"
+					className="max-w-[30rem]"
+					id="searchQuery"
+					value={filterQuery}
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+						setFilterQuery(e.target.value)
+					}
+				/>
+				{filterQuery && (
+					<Button
+						varient="default"
+						size="default"
+						onClick={() => setFilterQuery("")}
+					>
+						Reset
+					</Button>
+				)}
+			</div>
 			<Table>
 				<THead>
 					<TRow>
@@ -78,7 +118,7 @@ const Colors = () => {
 					</TRow>
 				</THead>
 				<TBody>
-					{colors?.map((color) => (
+					{filteredColors?.map((color) => (
 						<TRow key={color._id}>
 							<TRowData>{color.name}</TRowData>
 							<TRowData>
@@ -105,6 +145,27 @@ const Colors = () => {
 					))}
 				</TBody>
 			</Table>
+			<div className="w-full flex items-center p-4 justify-end gap-3">
+				<Button
+					varient="outline"
+					size="sm"
+					onClick={() => handlePagination("previous")}
+					disabled={pageNum === 1}
+				>
+					Previous
+				</Button>
+				<span>{pageNum}</span>
+				<Button
+					varient="outline"
+					size="sm"
+					onClick={() => handlePagination("next")}
+					disabled={
+						pageNum >= Math.ceil(colors.length / colorsPerPage)
+					}
+				>
+					Next
+				</Button>
+			</div>
 		</div>
 	);
 };

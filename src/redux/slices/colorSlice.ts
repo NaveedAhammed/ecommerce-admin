@@ -2,38 +2,68 @@ import { createSlice } from "@reduxjs/toolkit";
 import { ColorType } from "../../types";
 
 interface ColorsState {
-  colors: ColorType[];
-  isLoading: boolean;
+	colors: ColorType[];
+	isColorModalOpen: boolean;
+	colorData: ColorType | null;
+	editMode: boolean;
+	pageNum: number;
+	colorsPerPage: number;
 }
 
 const initialState: ColorsState = {
-  colors: [],
-  isLoading: false,
+	colors: [],
+	isColorModalOpen: false,
+	colorData: null,
+	editMode: false,
+	pageNum: 1,
+	colorsPerPage: 5,
 };
 
 const colorSlice = createSlice({
-  name: "color",
-  initialState,
-  reducers: {
-    setColors(state, action) {
-      state.colors = action.payload;
-    },
-    setLoading(state, action) {
-      state.isLoading = action.payload;
-    },
-    removeColor(state, action) {
-      state.colors = state.colors.filter((item) => item._id !== action.payload);
-    },
-    updateColor(state, action) {
-      const indexOfColor = state.colors.findIndex(
-        (item) => item._id === action.payload._id
-      );
-      state.colors[indexOfColor] = action.payload;
-    },
-  },
+	name: "color",
+	initialState,
+	reducers: {
+		setColors(state, action) {
+			state.colors = action.payload;
+		},
+		removeColor(state, action) {
+			state.colors = state.colors.filter(
+				(item) => item._id !== action.payload
+			);
+		},
+		updateColor(state, action) {
+			const indexOfColor = state.colors.findIndex(
+				(item) => item._id === action.payload._id
+			);
+			state.colors[indexOfColor] = action.payload;
+		},
+		setColorEditMode(state, action) {
+			state.editMode = action.payload;
+		},
+		setColorData(state, action) {
+			state.colorData = action.payload;
+		},
+		setIsColorModalOpen(state, action) {
+			state.isColorModalOpen = action.payload;
+		},
+		addNewColor(state, action) {
+			state.colors.push(action.payload);
+		},
+		setColorsPageNum(state, action) {
+			state.pageNum = action.payload;
+		},
+	},
 });
 
-export const { setColors, setLoading, updateColor, removeColor } =
-  colorSlice.actions;
+export const {
+	setColors,
+	updateColor,
+	removeColor,
+	addNewColor,
+	setColorData,
+	setColorEditMode,
+	setIsColorModalOpen,
+	setColorsPageNum,
+} = colorSlice.actions;
 
 export default colorSlice.reducer;

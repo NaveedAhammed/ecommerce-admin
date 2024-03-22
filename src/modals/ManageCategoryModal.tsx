@@ -3,155 +3,166 @@ import Button from "../components/Button";
 import Input from "../components/Input";
 import Label from "../components/Label";
 import Modal from "../components/Modal";
-import { ManageCategoryContextType } from "../context/ManageCategoryContext";
-import { useManageCategoryContext } from "../hooks/useManageCategoryContext";
-import ErrorBar from "../components/ErrorBar";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
-import { useAppDispatch } from "../redux/store";
-import { updateCategory } from "../redux/slices/categorySlice";
+import { useAppDispatch, useAppSelector } from "../redux/store";
+import {
+	addNewCategory,
+	setCategoryData,
+	setCategoryEditMode,
+	setCategoryModalOpen,
+	updateCategory,
+} from "../redux/slices/categorySlice";
 
 const ManageCategoryModal = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [hasNameFocused, setHasNameFocused] = useState<boolean>(false);
-  const [hasNameBlured, setHasNameBlured] = useState<boolean>(false);
-  const { isOpen, onClose, data, editMode } =
-    useManageCategoryContext() as ManageCategoryContextType;
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [hasNameFocused, setHasNameFocused] = useState<boolean>(false);
+	const [hasNameBlured, setHasNameBlured] = useState<boolean>(false);
 
-  const axiosPrivate = useAxiosPrivate();
+	const { isCategoryModalOpen, categoryData, editMode } = useAppSelector(
+		(state) => state.categories
+	);
 
-  const dispatch = useAppDispatch();
+	const axiosPrivate = useAxiosPrivate();
 
-  const firstInputRef = useRef<HTMLInputElement>(null);
-  const errorBarRef = useRef<HTMLParagraphElement>(null);
+	const dispatch = useAppDispatch();
 
-  const resetState = () => {
-    setHasNameBlured(false);
-    setHasNameFocused(false);
-  };
+	const firstInputRef = useRef<HTMLInputElement>(null);
 
-  const handleCancel = () => {
-    onClose();
-    resetState();
-  };
+	const resetState = () => {
+		setHasNameBlured(false);
+		setHasNameFocused(false);
+	};
 
-  const handleCreateCategory = async (formData: FormData) => {
-    const res = (await axiosPrivate.post("/category/new", formData)).data;
-    return res;
-  };
+	const handleCancel = () => {
+		dispatch(setCategoryModalOpen(false));
+		dispatch(setCategoryData(null));
+		dispatch(setCategoryEditMode(false));
+		resetState();
+	};
 
-  const handleUpdateCategory = async (formData: FormData) => {
-    const res = (
-      await axiosPrivate.put(`/category/update/${data._id}`, formData)
-    ).data;
-    dispatch(updateCategory(res.data.category));
-    return res;
-  };
+	const handleCreateCategory = async (formData: FormData) => {
+		const res = (await axiosPrivate.post("/category/new", formData)).data;
+		dispatch(addNewCategory(res.data.category));
+		return res;
+	};
 
-  const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formElement = e.target as HTMLFormElement;
-    const isValid = formElement.checkValidity();
-    const firstInvalidField = formElement.querySelector(
-      ":invalid"
-    ) as HTMLInputElement;
-    firstInvalidField?.focus();
-    if (isValid) {
-      const formData = new FormData(formElement);
-      try {
-        setIsLoading(true);
-        let res;
-        if (editMode) {
-          res = await handleUpdateCategory(formData);
-        } else {
-          res = await handleCreateCategory(formData);
-        }
-        console.log(res);
-        if (!res.success) {
-          return toast.error("Category creation failed, Please try again");
-        }
-        if (res.success) {
-          onClose();
-          resetState();
-          return toast.success(res.message);
-        }
-      } catch (err: unknown) {
-        console.log(err);
-        const error = err as AxiosError;
-        console.log(error);
-        if (!error?.response) {
-          return toast.error("Something went wrong");
-        } else {
-          return toast.error(`${error.response?.data?.message}`);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
+	const handleUpdateCategory = async (formData: FormData) => {
+		const res = (
+			await axiosPrivate.put(
+				`/category/update/${categoryData?._id}`,
+				formData
+			)
+		).data;
+		dispatch(updateCategory(res.data.category));
+		return res;
+	};
 
-  const body: React.ReactNode = (
-    <form
-      className="grid grid-cols-2 gap-6"
-      noValidate
-      onSubmit={handleOnSubmit}
-    >
-      <ErrorBar className="col-span-2" innerRef={errorBarRef}>
-        This is an error message
-      </ErrorBar>
-      <div className="flex flex-col col-span-2 gap-2">
-        <Label htmlFor="name">Name</Label>
-        <Input
-          id="name"
-          defaultValue={data.name}
-          autoComplete="off"
-          name="name"
-          type="text"
-          innerRef={firstInputRef}
-          required={true}
-          className="peer w-[24rem]"
-          onBlur={() => setHasNameBlured(true)}
-          onFocus={() => setHasNameFocused(true)}
-        />
-        {hasNameFocused && hasNameBlured && (
-          <Message error={true} className="hidden peer-invalid:block">
-            Category name is required
-          </Message>
-        )}
-      </div>
-      <div className="flex gap-2 items-center justify-end col-span-2">
-        <Button onClick={handleCancel} size="default" varient="outline">
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          size="default"
-          varient="default"
-          className="gap-2"
-        >
-          {isLoading && <Loader width="1rem" height="1rem" color="white" />}
-          Create
-        </Button>
-      </div>
-    </form>
-  );
+	const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		const formElement = e.target as HTMLFormElement;
+		const isValid = formElement.checkValidity();
+		const firstInvalidField = formElement.querySelector(
+			":invalid"
+		) as HTMLInputElement;
+		firstInvalidField?.focus();
+		if (isValid) {
+			const formData = new FormData(formElement);
+			try {
+				setIsLoading(true);
+				let res;
+				if (editMode) {
+					res = await handleUpdateCategory(formData);
+				} else {
+					res = await handleCreateCategory(formData);
+				}
+				console.log(res);
+				if (!res.success) {
+					return toast.error(
+						"Category creation failed, Please try again"
+					);
+				}
+				if (res.success) {
+					dispatch(setCategoryModalOpen(false));
+					resetState();
+					return toast.success(res.message);
+				}
+			} catch (err: unknown) {
+				console.log(err);
+				const error = err as AxiosError;
+				console.log(error);
+				if (!error?.response) {
+					return toast.error("Something went wrong");
+				} else {
+					return toast.error(`${error.response?.data?.message}`);
+				}
+			} finally {
+				setIsLoading(false);
+			}
+		}
+	};
 
-  useEffect(() => {
-    firstInputRef.current && firstInputRef.current.focus();
-  }, [isOpen]);
+	const body: React.ReactNode = (
+		<form
+			className="grid grid-cols-2 gap-6"
+			noValidate
+			onSubmit={handleOnSubmit}
+		>
+			<div className="flex flex-col col-span-2 gap-2">
+				<Label htmlFor="name">Name</Label>
+				<Input
+					id="name"
+					defaultValue={categoryData?.name}
+					autoComplete="off"
+					name="name"
+					type="text"
+					innerRef={firstInputRef}
+					required={true}
+					className="peer w-[24rem]"
+					onBlur={() => setHasNameBlured(true)}
+					onFocus={() => setHasNameFocused(true)}
+				/>
+				{hasNameFocused && hasNameBlured && (
+					<Message error={true} className="hidden peer-invalid:block">
+						Category name is required
+					</Message>
+				)}
+			</div>
+			<div className="flex gap-2 items-center justify-end col-span-2">
+				<Button onClick={handleCancel} size="default" varient="outline">
+					Cancel
+				</Button>
+				<Button
+					type="submit"
+					size="default"
+					varient="default"
+					className="gap-2"
+				>
+					{isLoading && (
+						<Loader width="1rem" height="1rem" color="white" />
+					)}
+					Create
+				</Button>
+			</div>
+		</form>
+	);
 
-  return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      body={body}
-      title="Create Category"
-      description="Create a new category for you products"
-    />
-  );
+	useEffect(() => {
+		firstInputRef.current && firstInputRef.current.focus();
+	}, [isCategoryModalOpen]);
+
+	return (
+		<Modal
+			isOpen={isCategoryModalOpen}
+			onClose={() => dispatch(setCategoryModalOpen(false))}
+			body={body}
+			title="Create Category"
+			description="Create a new category for you products"
+		/>
+	);
 };
 
 export default ManageCategoryModal;
