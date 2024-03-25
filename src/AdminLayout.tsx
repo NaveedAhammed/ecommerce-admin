@@ -3,16 +3,18 @@ import { Outlet } from "react-router-dom";
 import Loader from "./components/Loader";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import ManageCategoryModal from "./modals/ManageCategoryModal";
 import ManageColorModal from "./modals/ManageColorModal";
-import ManageSizeModal from "./modals/ManageSizeModal";
+import ManageSizeModal from "./modals/ManageUnitModal";
 import useAxiosPrivate from "./hooks/useAxiosPrivate";
-import { setSizes } from "./redux/slices/sizeSlice";
-import { setCategories } from "./redux/slices/categorySlice";
+import { setUnits } from "./redux/slices/unitSlice";
+import { setChildCategories } from "./redux/slices/childCategorySlice";
 import { setColors } from "./redux/slices/colorSlice";
 import { useAppDispatch } from "./redux/store";
 import ManageBillboardModal from "./modals/ManageBillboardModal";
 import { setBillboards } from "./redux/slices/billboardSlice";
+import { setParentCategories } from "./redux/slices/parentCategorySlice";
+import ManageChildCategoryModal from "./modals/ManageChildCategoryModal";
+import ManageParentCategoryModal from "./modals/ManageParentCategoryModal";
 
 const ManageProductModal = lazy(() => import("./modals/ManageProductModal"));
 
@@ -26,15 +28,19 @@ const AdminLayout = () => {
 		const getData = async () => {
 			try {
 				const res = await Promise.all([
-					axiosPrivate.get("/categories"),
+					axiosPrivate.get("/categories/child"),
+					axiosPrivate.get("/categories/parent"),
 					axiosPrivate.get("/colors"),
-					axiosPrivate.get("/sizes"),
+					axiosPrivate.get("/units"),
 					axiosPrivate.get("/billboards"),
 				]);
-				dispatch(setCategories(res[0].data.data.categories));
-				dispatch(setColors(res[1].data.data.colors));
-				dispatch(setSizes(res[2].data.data.sizes));
-				dispatch(setBillboards(res[3].data.data.billboards));
+				dispatch(setChildCategories(res[0].data.data.childCategories));
+				dispatch(
+					setParentCategories(res[1].data.data.parentCategories)
+				);
+				dispatch(setColors(res[2].data.data.colors));
+				dispatch(setUnits(res[3].data.data.units));
+				dispatch(setBillboards(res[4].data.data.billboards));
 				isMounted && console.log(res);
 			} catch (err) {
 				console.log(err);
@@ -63,10 +69,11 @@ const AdminLayout = () => {
 					}
 				>
 					<ManageProductModal />
-					<ManageCategoryModal />
+					<ManageParentCategoryModal />
 					<ManageColorModal />
 					<ManageSizeModal />
 					<ManageBillboardModal />
+					<ManageChildCategoryModal />
 					<Outlet />
 				</Suspense>
 			</main>

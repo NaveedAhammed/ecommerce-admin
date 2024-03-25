@@ -7,12 +7,13 @@ import { lazy } from "react";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Billboards = lazy(() => import("./pages/Billboards"));
-const Categories = lazy(() => import("./pages/Categories"));
+const ParentCategories = lazy(() => import("./pages/ParentCategories"));
+const Categories = lazy(() => import("./pages/ChildCategories"));
 const Colors = lazy(() => import("./pages/Colors"));
 const Orders = lazy(() => import("./pages/Orders"));
 const Products = lazy(() => import("./pages/Products"));
 const Settings = lazy(() => import("./pages/Settings"));
-const Sizes = lazy(() => import("./pages/Sizes"));
+const Units = lazy(() => import("./pages/Units"));
 
 const router = createBrowserRouter([
 	{
@@ -33,7 +34,11 @@ const router = createBrowserRouter([
 								element: <Billboards />,
 							},
 							{
-								path: "categories",
+								path: "parentCategories",
+								element: <ParentCategories />,
+							},
+							{
+								path: "childCategories",
 								element: <Categories />,
 							},
 							{
@@ -41,8 +46,8 @@ const router = createBrowserRouter([
 								element: <Colors />,
 							},
 							{
-								path: "sizes",
-								element: <Sizes />,
+								path: "units",
+								element: <Units />,
 							},
 							{
 								path: "products",

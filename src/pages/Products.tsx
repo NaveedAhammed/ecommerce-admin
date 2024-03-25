@@ -24,14 +24,17 @@ import { ProductType } from "../types";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
 import ControlledInput from "../components/ControlledInput";
+import Loader from "../components/Loader";
+import { correncyFormatter } from "../utils/correncyFormat";
 
 const Products = () => {
 	const { products, pageNum, productsPerPage, totalProducts } =
 		useAppSelector((state) => state.products);
+	const [isLoading, setIsLoading] = useState(false);
 
 	const [filterQuery, setFilterQuery] = useState<string>("");
 
-	const filteredProducts = products.filter((pro) =>
+	const filteredProducts = products?.filter((pro) =>
 		pro.title.includes(filterQuery)
 	);
 
@@ -69,8 +72,8 @@ const Products = () => {
 
 	const handlePagination = (dir: string) => {
 		filterQuery && setFilterQuery("");
+		dispatch(setProducts({ products: [] }));
 		if (dir === "previous") {
-			if (pageNum === 1) return;
 			dispatch(setPageNum(pageNum - 1));
 		} else {
 			dispatch(setPageNum(pageNum + 1));
@@ -80,6 +83,7 @@ const Products = () => {
 	useEffect(() => {
 		const fetchProducts = async () => {
 			try {
+				setIsLoading(true);
 				const res = (
 					await axiosPrivate.get(`/products?page=${pageNum}`)
 				).data;
@@ -92,11 +96,13 @@ const Products = () => {
 				console.log(res.data);
 			} catch (err) {
 				console.log(err);
+			} finally {
+				setIsLoading(false);
 			}
 		};
 
-		fetchProducts();
-	}, [axiosPrivate, dispatch, pageNum]);
+		products.length === 0 && fetchProducts();
+	}, [axiosPrivate, dispatch, pageNum, products]);
 	return (
 		<div className="w-full h-full">
 			<Heading
@@ -136,7 +142,7 @@ const Products = () => {
 						<THeadData>Stock</THeadData>
 						<THeadData>Price</THeadData>
 						<THeadData>Discount</THeadData>
-						<THeadData>Size</THeadData>
+						<THeadData>Unit</THeadData>
 						<THeadData>Color</THeadData>
 						<THeadData>Category</THeadData>
 						<THeadData>Featured</THeadData>
@@ -144,41 +150,73 @@ const Products = () => {
 						<THeadData>Action</THeadData>
 					</TRow>
 				</THead>
-				<TBody>
-					{filteredProducts?.map((product) => (
-						<TRow key={product._id}>
-							<TRowData>{product.title.slice(0, 10)}...</TRowData>
-							<TRowData>
-								{product.description.slice(0, 40)}...
-							</TRowData>
-							<TRowData>{product.stock}</TRowData>
-							<TRowData>{product.price}</TRowData>
-							<TRowData>{product.discount}</TRowData>
-							<TRowData>{product.size?.name}</TRowData>
-							<TRowData>{product.color?.name}</TRowData>
-							<TRowData>{product.category?.name}</TRowData>
-							<TRowData>
-								{product.featured ? "true" : "false"}
-							</TRowData>
-							<TRowData>
-								{dayjs(
-									product?.createdAt?.split("T")[0]
-								).format("MMM D, YYYY")}
-							</TRowData>
-							<TableAction
-								onDelete={() => handleActionDelete(product)}
-								onEdit={() => handleActionEdit(product)}
-							/>
-						</TRow>
-					))}
-				</TBody>
+				{isLoading && (
+					<tbody className="relative">
+						<tr>
+							<td className="h-16">
+								<Loader
+									color="black"
+									height="2rem"
+									width="2rem"
+									className="absolute top-4 left-[50%]"
+								/>
+							</td>
+						</tr>
+					</tbody>
+				)}
+				{filteredProducts?.length > 0 && (
+					<TBody>
+						{filteredProducts?.map((product) => (
+							<TRow key={product._id}>
+								<TRowData>
+									{product.title.slice(0, 10)}...
+								</TRowData>
+								<TRowData>
+									{product.description.slice(0, 15)}...
+								</TRowData>
+								<TRowData>{product.stock}</TRowData>
+								<TRowData>
+									{correncyFormatter.format(
+										Number(product.price)
+									)}
+								</TRowData>
+								<TRowData>{product.discount}%</TRowData>
+								<TRowData>
+									{product?.unit
+										? `${product?.unit?.name}, ${product?.unit.value}`
+										: "--"}
+								</TRowData>
+								<TRowData>
+									{product.color?.name || "--"}
+								</TRowData>
+								<TRowData>
+									{product.category
+										? `${product.category.parentCategory.name}, ${product.category.name}`
+										: "--"}
+								</TRowData>
+								<TRowData>
+									{product.featured ? "true" : "false"}
+								</TRowData>
+								<TRowData>
+									{dayjs(
+										product?.createdAt?.split("T")[0]
+									).format("MMM D, YYYY")}
+								</TRowData>
+								<TableAction
+									onDelete={() => handleActionDelete(product)}
+									onEdit={() => handleActionEdit(product)}
+								/>
+							</TRow>
+						))}
+					</TBody>
+				)}
 			</Table>
 			<div className="w-full flex items-center p-4 justify-end gap-3">
 				<Button
 					varient="outline"
 					size="sm"
 					onClick={() => handlePagination("previous")}
-					disabled={pageNum === 1}
+					disabled={pageNum === 1 || isLoading}
 				>
 					Previous
 				</Button>
@@ -191,7 +229,7 @@ const Products = () => {
 						totalProducts
 							? pageNum >=
 							  Math.ceil(totalProducts / productsPerPage)
-							: true
+							: isLoading
 					}
 				>
 					Next

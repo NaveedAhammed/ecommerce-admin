@@ -9,32 +9,31 @@ import Table, {
 import TableAction from "../components/TableAction";
 import dayjs from "dayjs";
 import { useAppDispatch, useAppSelector } from "../redux/store";
-import { CategoryType } from "../types";
+import { ParentCategoryType } from "../types";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import toast from "react-hot-toast";
-import {
-	removeCategory,
-	setCategoriesPageNum,
-	setCategoryData,
-	setCategoryEditMode,
-	setCategoryModalOpen,
-} from "../redux/slices/categorySlice";
 import { AxiosError } from "axios";
 import Button from "../components/Button";
 import { useState } from "react";
 import ControlledInput from "../components/ControlledInput";
+import {
+	removeParentCategory,
+	setIsParentCategoryModalOpen,
+	setParentCategoriesPageNum,
+	setParentCategoryData,
+	setParentCategoryEditMode,
+} from "../redux/slices/parentCategorySlice";
 
-const Categories = () => {
-	const { categories, categoriesPerPage, pageNum } = useAppSelector(
-		(state) => state.categories
-	);
+const ParentCategories = () => {
+	const { parentCategories, parentCategoriesPerPage, pageNum } =
+		useAppSelector((state) => state.parentCategories);
 
 	const [filterQuery, setFilterQuery] = useState<string>("");
 
-	const filteredCategories = categories
+	const filteredParentCategories = parentCategories
 		.slice(
-			(pageNum - 1) * categoriesPerPage,
-			(pageNum - 1) * categoriesPerPage + categoriesPerPage
+			(pageNum - 1) * parentCategoriesPerPage,
+			(pageNum - 1) * parentCategoriesPerPage + parentCategoriesPerPage
 		)
 		.filter((cat) => cat.name.includes(filterQuery));
 
@@ -42,18 +41,20 @@ const Categories = () => {
 
 	const dispatch = useAppDispatch();
 
-	const handleActionEdit = (data: CategoryType) => {
-		dispatch(setCategoryData(data));
-		dispatch(setCategoryEditMode(true));
-		dispatch(setCategoryModalOpen(true));
+	const handleActionEdit = (data: ParentCategoryType) => {
+		dispatch(setParentCategoryData(data));
+		dispatch(setParentCategoryEditMode(true));
+		dispatch(setIsParentCategoryModalOpen(true));
 	};
 
-	const handleActionDelete = (category: CategoryType) => {
-		const res = axiosPrivate.delete(`/category/delete/${category._id}`);
+	const handleActionDelete = (parentCategory: ParentCategoryType) => {
+		const res = axiosPrivate.delete(
+			`/category/parent/delete/${parentCategory._id}`
+		);
 		toast.promise(res, {
-			loading: `Deleting the category ${category.name}`,
+			loading: `Deleting the parent category ${parentCategory?.name}`,
 			success: () => {
-				dispatch(removeCategory(category._id));
+				dispatch(removeParentCategory(parentCategory._id));
 				return "Deleted successfully";
 			},
 			error: (err) => {
@@ -72,18 +73,18 @@ const Categories = () => {
 		filterQuery && setFilterQuery("");
 		if (dir === "previous") {
 			if (pageNum === 1) return;
-			dispatch(setCategoriesPageNum(pageNum - 1));
+			dispatch(setParentCategoriesPageNum(pageNum - 1));
 		} else {
-			dispatch(setCategoriesPageNum(pageNum + 1));
+			dispatch(setParentCategoriesPageNum(pageNum + 1));
 		}
 	};
 
 	return (
 		<div className="w-full h-full">
 			<Heading
-				title="Categories"
-				description="Manage categories for your products"
-				action={() => dispatch(setCategoryModalOpen(true))}
+				title="Parent Categories"
+				description="Manage parent categories for your products"
+				action={() => dispatch(setIsParentCategoryModalOpen(true))}
 				actionLabel="Add New"
 			/>
 			<div className="flex items-center gap-4 w-full mb-4">
@@ -113,22 +114,24 @@ const Categories = () => {
 				<THead>
 					<TRow>
 						<THeadData>Name</THeadData>
-						<THeadData>Value</THeadData>
+						<THeadData>Created At</THeadData>
 						<THeadData>Action</THeadData>
 					</TRow>
 				</THead>
 				<TBody>
-					{filteredCategories?.map((category) => (
-						<TRow key={category._id}>
-							<TRowData>{category.name}</TRowData>
+					{filteredParentCategories?.map((parentCategory) => (
+						<TRow key={parentCategory._id}>
+							<TRowData>{parentCategory.name}</TRowData>
 							<TRowData>
 								{dayjs(
-									category?.createdAt?.split("T")[0]
+									parentCategory?.createdAt?.split("T")[0]
 								).format("MMM D, YYYY")}
 							</TRowData>
 							<TableAction
-								onDelete={() => handleActionDelete(category)}
-								onEdit={() => handleActionEdit(category)}
+								onDelete={() =>
+									handleActionDelete(parentCategory)
+								}
+								onEdit={() => handleActionEdit(parentCategory)}
 							/>
 						</TRow>
 					))}
@@ -150,7 +153,9 @@ const Categories = () => {
 					onClick={() => handlePagination("next")}
 					disabled={
 						pageNum >=
-						Math.ceil(categories.length / categoriesPerPage)
+						Math.ceil(
+							parentCategories.length / parentCategoriesPerPage
+						)
 					}
 				>
 					Next
@@ -160,4 +165,4 @@ const Categories = () => {
 	);
 };
 
-export default Categories;
+export default ParentCategories;

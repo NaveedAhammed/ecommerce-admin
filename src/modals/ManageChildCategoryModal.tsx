@@ -3,46 +3,50 @@ import Button from "../components/Button";
 import Input from "../components/Input";
 import Label from "../components/Label";
 import Modal from "../components/Modal";
-import { AxiosError } from "axios";
-import toast from "react-hot-toast";
-import Loader from "../components/Loader";
-import Message from "../components/Message";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
-import {
-	addNewColor,
-	setColorData,
-	setColorEditMode,
-	setIsColorModalOpen,
-	updateColor,
-} from "../redux/slices/colorSlice";
+import toast from "react-hot-toast";
+import { AxiosError } from "axios";
+import Message from "../components/Message";
+import Loader from "../components/Loader";
 import { useAppDispatch, useAppSelector } from "../redux/store";
+import {
+	addNewChildCategory,
+	setChildCategoryData,
+	setChildCategoryEditMode,
+	setIsChildCategoryModalOpen,
+	updateChildCategory,
+} from "../redux/slices/childCategorySlice";
+import Select from "../components/Select";
 
 type InputFieldsState = {
+	parentCategory: boolean;
 	name: boolean;
-	value: boolean;
 };
 
 const defaultState: InputFieldsState = {
 	name: false,
-	value: false,
+	parentCategory: false,
 };
 
-const ManageColorModal = () => {
+const ManageChildCategoryModal = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [hasInputFocused, setHasInputFocused] =
 		useState<InputFieldsState>(defaultState);
 	const [hasInputBlured, setHasInputBlured] =
 		useState<InputFieldsState>(defaultState);
 
-	const { isColorModalOpen, editMode, colorData } = useAppSelector(
-		(state) => state.colors
-	);
+	const { isChildCategoryModalOpen, childCategoryData, editMode } =
+		useAppSelector((state) => state.childCategories);
 
-	const firstInputRef = useRef<HTMLInputElement>(null);
+	const { parentCategories } = useAppSelector(
+		(state) => state.parentCategories
+	);
 
 	const axiosPrivate = useAxiosPrivate();
 
 	const dispatch = useAppDispatch();
+
+	const firstInputRef = useRef<HTMLInputElement>(null);
 
 	const resetState = () => {
 		setHasInputBlured(defaultState);
@@ -50,27 +54,32 @@ const ManageColorModal = () => {
 	};
 
 	const handleCancel = () => {
-		dispatch(setIsColorModalOpen(false));
-		dispatch(setColorData(null));
-		dispatch(setColorEditMode(false));
+		dispatch(setIsChildCategoryModalOpen(false));
+		dispatch(setChildCategoryData(null));
+		dispatch(setChildCategoryEditMode(false));
 		resetState();
 	};
 
-	const handleCreateColor = async (formData: FormData) => {
+	const handleCreateChildCategory = async (formData: FormData) => {
 		try {
 			setIsLoading(true);
-			const res = (await axiosPrivate.post("/color/new", formData)).data;
+			const res = (
+				await axiosPrivate.post("/category/child/new", formData)
+			).data;
 			console.log(res);
 			if (!res.success) {
-				return toast.error("Color creation failed, Please try again");
+				return toast.error(
+					"Child category creation failed, Please try again"
+				);
 			}
 			if (res.success) {
-				dispatch(setIsColorModalOpen(false));
-				dispatch(addNewColor(res.data.color));
+				dispatch(setIsChildCategoryModalOpen(false));
+				dispatch(addNewChildCategory(res.data.childCategory));
 				resetState();
 				return toast.success(res.message);
 			}
-		} catch (err: unknown) {
+			dispatch(addNewChildCategory(res.data.childCategory));
+		} catch (err) {
 			console.log(err);
 			const error = err as AxiosError;
 			console.log(error);
@@ -84,27 +93,30 @@ const ManageColorModal = () => {
 		}
 	};
 
-	const handleUpdateColor = async (formData: FormData) => {
+	const handleUpdateChildCategory = async (formData: FormData) => {
 		try {
 			setIsLoading(true);
 			const res = (
 				await axiosPrivate.put(
-					`/color/update/${colorData?._id}`,
+					`/category/child/update/${childCategoryData?._id}`,
 					formData
 				)
 			).data;
 			console.log(res);
 			if (!res.success) {
-				return toast.error("Color creation failed, Please try again");
+				return toast.error(
+					"Child category updation failed, Please try again"
+				);
 			}
 			if (res.success) {
-				dispatch(setIsColorModalOpen(false));
-				dispatch(setColorData(null));
-				dispatch(updateColor(res.data.color));
+				dispatch(setIsChildCategoryModalOpen(false));
+				dispatch(setChildCategoryEditMode(false));
+				dispatch(setChildCategoryData(null));
+				dispatch(updateChildCategory(res.data.childCategory));
 				resetState();
 				return toast.success(res.message);
 			}
-		} catch (err: unknown) {
+		} catch (err) {
 			console.log(err);
 			const error = err as AxiosError;
 			console.log(error);
@@ -129,9 +141,9 @@ const ManageColorModal = () => {
 		if (isValid) {
 			const formData = new FormData(formElement);
 			if (editMode) {
-				handleUpdateColor(formData);
+				await handleUpdateChildCategory(formData);
 			} else {
-				handleCreateColor(formData);
+				await handleCreateChildCategory(formData);
 			}
 		}
 	};
@@ -142,54 +154,69 @@ const ManageColorModal = () => {
 			noValidate
 			onSubmit={handleOnSubmit}
 		>
-			<div className="flex flex-col gap-1">
-				<Label htmlFor="name">Name</Label>
+			<div className="flex flex-col col-span-2 gap-2">
+				<Label htmlFor="name">Child Category Name</Label>
 				<Input
 					id="name"
-					defaultValue={colorData?.name}
+					defaultValue={childCategoryData?.name}
 					autoComplete="off"
 					name="name"
 					type="text"
 					innerRef={firstInputRef}
-					disabled={isLoading}
+					required={true}
+					className="peer min-w-[24rem]"
 					onBlur={() =>
-						setHasInputBlured((prev) => ({ ...prev, name: true }))
+						setHasInputBlured((prev) => ({
+							...prev,
+							name: true,
+						}))
 					}
 					onFocus={() =>
-						setHasInputFocused((prev) => ({ ...prev, name: true }))
+						setHasInputFocused((prev) => ({
+							...prev,
+							name: true,
+						}))
 					}
-					className="peer"
-					required={true}
 				/>
 				{hasInputFocused.name && hasInputBlured.name && (
 					<Message error={true} className="hidden peer-invalid:block">
-						Color name is required
+						Child category name is required
 					</Message>
 				)}
 			</div>
 			<div className="flex flex-col gap-1">
-				<Label htmlFor="value">Value</Label>
-				<Input
-					id="value"
-					defaultValue={colorData?.value}
-					autoComplete="off"
-					name="value"
-					type="text"
-					disabled={isLoading}
+				<Label htmlFor="parentCategoryId">Parent Category</Label>
+				<Select
+					name="parentCategoryId"
+					id="parentCategoryId"
+					options={parentCategories?.map((parentCategory) => ({
+						id: parentCategory?._id,
+						name: parentCategory?.name,
+					}))}
+					required={true}
+					className="peer"
 					onBlur={() =>
-						setHasInputBlured((prev) => ({ ...prev, value: true }))
+						setHasInputBlured((prev) => ({
+							...prev,
+							parentCategory: true,
+						}))
 					}
 					onFocus={() =>
-						setHasInputFocused((prev) => ({ ...prev, value: true }))
+						setHasInputFocused((prev) => ({
+							...prev,
+							parentCategory: true,
+						}))
 					}
-					className="peer"
-					required={true}
 				/>
-				{hasInputFocused.value && hasInputBlured.value && (
-					<Message error={true} className="hidden peer-invalid:block">
-						Color value is required
-					</Message>
-				)}
+				{hasInputFocused.parentCategory &&
+					hasInputBlured.parentCategory && (
+						<Message
+							error={true}
+							className="hidden peer-invalid:block"
+						>
+							Parent category is required
+						</Message>
+					)}
 			</div>
 			<div className="flex gap-2 items-center justify-end col-span-2">
 				<Button onClick={handleCancel} size="default" varient="outline">
@@ -227,19 +254,19 @@ const ManageColorModal = () => {
 
 	useEffect(() => {
 		firstInputRef.current && firstInputRef.current.focus();
-	}, [isColorModalOpen]);
+	}, [isChildCategoryModalOpen]);
 
 	return (
 		<Modal
-			isOpen={isColorModalOpen}
-			onClose={() => dispatch(setIsColorModalOpen(false))}
+			isOpen={isChildCategoryModalOpen}
+			onClose={() => dispatch(setIsChildCategoryModalOpen(false))}
 			body={body}
-			title={`${editMode ? "Edit" : "Create"} Color`}
+			title={`${editMode ? "Edit" : "Create"} child category`}
 			description={`${
 				editMode ? "Edit the" : "Create a new"
-			} color for your products`}
+			} child category for you products`}
 		/>
 	);
 };
 
-export default ManageColorModal;
+export default ManageChildCategoryModal;

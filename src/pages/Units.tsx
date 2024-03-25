@@ -10,50 +10,50 @@ import TableAction from "../components/TableAction";
 import dayjs from "dayjs";
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import {
-	removeSize,
-	setIsSizeModalOpen,
-	setSizeData,
-	setSizeEditMode,
-	setSizesPageNum,
-} from "../redux/slices/sizeSlice";
+	removeUnit,
+	setIsUnitModalOpen,
+	setUnitData,
+	setUnitEditMode,
+	setUnitsPageNum,
+} from "../redux/slices/unitSlice";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import toast from "react-hot-toast";
 import { AxiosError } from "axios";
-import { SizeType } from "../types";
+import { UnitType } from "../types";
 import { useState } from "react";
 import ControlledInput from "../components/ControlledInput";
 import Button from "../components/Button";
 
-const Sizes = () => {
-	const { sizes, pageNum, sizesPerPage } = useAppSelector(
-		(state) => state.sizes
+const Units = () => {
+	const { units, pageNum, unitsPerPage } = useAppSelector(
+		(state) => state.units
 	);
 
 	const [filterQuery, setFilterQuery] = useState<string>("");
 
-	const filteredSizes = sizes
-		.slice(
-			(pageNum - 1) * sizesPerPage,
-			(pageNum - 1) * sizesPerPage + sizesPerPage
+	const filteredUnits = units
+		?.slice(
+			(pageNum - 1) * unitsPerPage,
+			(pageNum - 1) * unitsPerPage + unitsPerPage
 		)
-		.filter((size) => size.name.includes(filterQuery));
+		.filter((unit) => unit.name.includes(filterQuery));
 
 	const axiosPrivate = useAxiosPrivate();
 
 	const dispatch = useAppDispatch();
 
-	const handleActionEdit = (data: SizeType) => {
-		dispatch(setSizeData(data));
-		dispatch(setSizeEditMode(true));
-		dispatch(setIsSizeModalOpen(true));
+	const handleActionEdit = (data: UnitType) => {
+		dispatch(setUnitData(data));
+		dispatch(setUnitEditMode(true));
+		dispatch(setIsUnitModalOpen(true));
 	};
 
-	const handleActionDelete = (size: SizeType) => {
-		const res = axiosPrivate.delete(`/size/delete/${size._id}`);
+	const handleActionDelete = (unit: UnitType) => {
+		const res = axiosPrivate.delete(`/unit/delete/${unit._id}`);
 		toast.promise(res, {
-			loading: `Deleting the size ${size.name}`,
+			loading: `Deleting the unit ${unit.name}`,
 			success: () => {
-				dispatch(removeSize(size._id));
+				dispatch(removeUnit(unit._id));
 				return "Deleted successfully";
 			},
 			error: (err) => {
@@ -72,18 +72,18 @@ const Sizes = () => {
 		filterQuery && setFilterQuery("");
 		if (dir === "previous") {
 			if (pageNum === 1) return;
-			dispatch(setSizesPageNum(pageNum - 1));
+			dispatch(setUnitsPageNum(pageNum - 1));
 		} else {
-			dispatch(setSizesPageNum(pageNum + 1));
+			dispatch(setUnitsPageNum(pageNum + 1));
 		}
 	};
 
 	return (
 		<div className="w-full h-full">
 			<Heading
-				title="Sizes"
-				description="Manage sizes for your products"
-				action={() => dispatch(setIsSizeModalOpen(true))}
+				title="Units"
+				description="Manage units for your products"
+				action={() => dispatch(setIsUnitModalOpen(true))}
 				actionLabel="Add New"
 			/>
 			<div className="flex items-center gap-4 w-full mb-4">
@@ -114,23 +114,25 @@ const Sizes = () => {
 					<TRow>
 						<THeadData>Name</THeadData>
 						<THeadData>Value</THeadData>
-						<THeadData>Date</THeadData>
+						<THeadData>Short Hand</THeadData>
+						<THeadData>Created At</THeadData>
 						<THeadData>Action</THeadData>
 					</TRow>
 				</THead>
 				<TBody>
-					{filteredSizes?.map((size) => (
-						<TRow key={size._id}>
-							<TRowData>{size.name}</TRowData>
-							<TRowData>{size.value}</TRowData>
+					{filteredUnits?.map((unit) => (
+						<TRow key={unit._id}>
+							<TRowData>{unit.name}</TRowData>
+							<TRowData>{unit.value}</TRowData>
+							<TRowData>{unit?.shortHand || "--"}</TRowData>
 							<TRowData>
-								{dayjs(size?.createdAt?.split("T")[0]).format(
+								{dayjs(unit.createdAt?.split("T")[0]).format(
 									"MMM D, YYYY"
 								)}
 							</TRowData>
 							<TableAction
-								onDelete={() => handleActionDelete(size)}
-								onEdit={() => handleActionEdit(size)}
+								onDelete={() => handleActionDelete(unit)}
+								onEdit={() => handleActionEdit(unit)}
 							/>
 						</TRow>
 					))}
@@ -150,7 +152,9 @@ const Sizes = () => {
 					varient="outline"
 					size="sm"
 					onClick={() => handlePagination("next")}
-					disabled={pageNum >= Math.ceil(sizes.length / sizesPerPage)}
+					disabled={
+						pageNum >= Math.ceil(units?.length / unitsPerPage)
+					}
 				>
 					Next
 				</Button>
@@ -159,4 +163,4 @@ const Sizes = () => {
 	);
 };
 
-export default Sizes;
+export default Units;

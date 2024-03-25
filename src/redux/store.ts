@@ -1,7 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import sizesReducer from "../redux/slices/sizeSlice";
+import unitsReducer from "./slices/unitSlice";
 import productsReducer from "../redux/slices/productSlice";
-import categoriesReducer from "../redux/slices/categorySlice";
+import childCategoriesReducer from "./slices/childCategorySlice";
+import parentCategoriesReducer from "../redux/slices/parentCategorySlice";
 import colorsReducer from "../redux/slices/colorSlice";
 import billboardsReducer from "../redux/slices/billboardSlice";
 import { TypedUseSelectorHook, useDispatch } from "react-redux";
@@ -9,11 +10,12 @@ import { useSelector } from "react-redux";
 
 export const store = configureStore({
 	reducer: {
-		sizes: sizesReducer,
+		units: unitsReducer,
 		colors: colorsReducer,
-		categories: categoriesReducer,
+		childCategories: childCategoriesReducer,
 		products: productsReducer,
 		billboards: billboardsReducer,
+		parentCategories: parentCategoriesReducer,
 	},
 });
 

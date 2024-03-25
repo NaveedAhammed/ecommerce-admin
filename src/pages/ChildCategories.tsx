@@ -9,52 +9,53 @@ import Table, {
 import TableAction from "../components/TableAction";
 import dayjs from "dayjs";
 import { useAppDispatch, useAppSelector } from "../redux/store";
-import { ColorType } from "../types";
+import { ChildCategoryType } from "../types";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import toast from "react-hot-toast";
 import {
-	removeColor,
-	setColorData,
-	setColorEditMode,
-	setColorsPageNum,
-	setIsColorModalOpen,
-} from "../redux/slices/colorSlice";
+	removeChildCategory,
+	setChildCategoriesPageNum,
+	setChildCategoryData,
+	setChildCategoryEditMode,
+	setIsChildCategoryModalOpen,
+} from "../redux/slices/childCategorySlice";
 import { AxiosError } from "axios";
-import { useState } from "react";
 import Button from "../components/Button";
+import { useState } from "react";
 import ControlledInput from "../components/ControlledInput";
-import multiColor from "../assets/multiColor.svg";
 
-const Colors = () => {
-	const { colors, pageNum, colorsPerPage } = useAppSelector(
-		(state) => state.colors
+const Categories = () => {
+	const { childCategories, childCategoriesPerPage, pageNum } = useAppSelector(
+		(state) => state.childCategories
 	);
 
 	const [filterQuery, setFilterQuery] = useState<string>("");
 
-	const filteredColors = colors
+	const filteredChildCategories = childCategories
 		.slice(
-			(pageNum - 1) * colorsPerPage,
-			(pageNum - 1) * colorsPerPage + colorsPerPage
+			(pageNum - 1) * childCategoriesPerPage,
+			(pageNum - 1) * childCategoriesPerPage + childCategoriesPerPage
 		)
-		.filter((color) => color.name.includes(filterQuery));
+		.filter((cat) => cat.name.includes(filterQuery));
 
 	const axiosPrivate = useAxiosPrivate();
 
 	const dispatch = useAppDispatch();
 
-	const handleActionEdit = (data: ColorType) => {
-		dispatch(setColorData(data));
-		dispatch(setColorEditMode(true));
-		dispatch(setIsColorModalOpen(true));
+	const handleActionEdit = (data: ChildCategoryType) => {
+		dispatch(setChildCategoryData(data));
+		dispatch(setChildCategoryEditMode(true));
+		dispatch(setIsChildCategoryModalOpen(true));
 	};
 
-	const handleActionDelete = (color: ColorType) => {
-		const res = axiosPrivate.delete(`/color/delete/${color._id}`);
+	const handleActionDelete = (childCategory: ChildCategoryType) => {
+		const res = axiosPrivate.delete(
+			`/category/child/delete/${childCategory._id}`
+		);
 		toast.promise(res, {
-			loading: `Deleting the color ${color.name}`,
+			loading: `Deleting the category ${childCategory?.name}`,
 			success: () => {
-				dispatch(removeColor(color._id));
+				dispatch(removeChildCategory(childCategory._id));
 				return "Deleted successfully";
 			},
 			error: (err) => {
@@ -73,18 +74,18 @@ const Colors = () => {
 		filterQuery && setFilterQuery("");
 		if (dir === "previous") {
 			if (pageNum === 1) return;
-			dispatch(setColorsPageNum(pageNum - 1));
+			dispatch(setChildCategoriesPageNum(pageNum - 1));
 		} else {
-			dispatch(setColorsPageNum(pageNum + 1));
+			dispatch(setChildCategoriesPageNum(pageNum + 1));
 		}
 	};
 
 	return (
-		<div className="h-full">
+		<div className="w-full h-full">
 			<Heading
-				title="Colors"
-				description="Manage colors for your products"
-				action={() => dispatch(setIsColorModalOpen(true))}
+				title="Child Categories"
+				description="Manage child categories for your products"
+				action={() => dispatch(setIsChildCategoryModalOpen(true))}
 				actionLabel="Add New"
 			/>
 			<div className="flex items-center gap-4 w-full mb-4">
@@ -114,41 +115,28 @@ const Colors = () => {
 				<THead>
 					<TRow>
 						<THeadData>Name</THeadData>
-						<THeadData>Value</THeadData>
+						<THeadData>Parent Category</THeadData>
+						<THeadData>Created At</THeadData>
 						<THeadData>Action</THeadData>
 					</TRow>
 				</THead>
 				<TBody>
-					{filteredColors?.map((color) => (
-						<TRow key={color._id}>
-							<TRowData>{color.name}</TRowData>
+					{filteredChildCategories?.map((childCategory) => (
+						<TRow key={childCategory._id}>
+							<TRowData>{childCategory.name}</TRowData>
 							<TRowData>
-								<div className="flex items-center gap-2">
-									<span>{color.value}</span>
-									<div
-										className={`w-6 h-6 rounded-full border`}
-										style={{
-											backgroundColor: `${color.value}`,
-										}}
-									>
-										{color.value === "multiColor" && (
-											<img
-												src={multiColor}
-												alt=""
-												className="object-fill"
-											/>
-										)}
-									</div>
-								</div>
+								{childCategory.parentCategory.name}
 							</TRowData>
 							<TRowData>
-								{dayjs(color?.createdAt?.split("T")[0]).format(
-									"MMM D, YYYY"
-								)}
+								{dayjs(
+									childCategory?.createdAt?.split("T")[0]
+								).format("MMM D, YYYY")}
 							</TRowData>
 							<TableAction
-								onDelete={() => handleActionDelete(color)}
-								onEdit={() => handleActionEdit(color)}
+								onDelete={() =>
+									handleActionDelete(childCategory)
+								}
+								onEdit={() => handleActionEdit(childCategory)}
 							/>
 						</TRow>
 					))}
@@ -169,7 +157,10 @@ const Colors = () => {
 					size="sm"
 					onClick={() => handlePagination("next")}
 					disabled={
-						pageNum >= Math.ceil(colors.length / colorsPerPage)
+						pageNum >=
+						Math.ceil(
+							childCategories.length / childCategoriesPerPage
+						)
 					}
 				>
 					Next
@@ -179,4 +170,4 @@ const Colors = () => {
 	);
 };
 
-export default Colors;
+export default Categories;

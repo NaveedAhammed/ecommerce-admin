@@ -12,17 +12,18 @@ import { useAppDispatch, useAppSelector } from "../redux/store";
 import { BillboardType } from "../types";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import toast from "react-hot-toast";
-import { removeCategory } from "../redux/slices/categorySlice";
 import { AxiosError } from "axios";
 import {
 	setBillboardData,
 	setBillboardEditMode,
 	setIsBillboardModalOpen,
 	setBillboardsPageNum,
+	removeBillboard,
 } from "../redux/slices/billboardSlice";
 import Button from "../components/Button";
 import { useState } from "react";
 import ControlledInput from "../components/ControlledInput";
+import Loader from "../components/Loader";
 
 const Billboards = () => {
 	const { billboards, pageNum, billboardsPerPage } = useAppSelector(
@@ -53,7 +54,7 @@ const Billboards = () => {
 		toast.promise(res, {
 			loading: `Deleting the billboard ${billboard.title}`,
 			success: () => {
-				dispatch(removeCategory(billboard._id));
+				dispatch(removeBillboard(billboard._id));
 				return "Deleted successfully";
 			},
 			error: (err) => {
@@ -114,12 +115,23 @@ const Billboards = () => {
 					<TRow>
 						<THeadData>Image</THeadData>
 						<THeadData>Title</THeadData>
-						<THeadData>Category</THeadData>
-						<THeadData>Date</THeadData>
+						<THeadData>Parent Category</THeadData>
+						<THeadData>Create At</THeadData>
 						<THeadData>Action</THeadData>
 					</TRow>
 				</THead>
 				<TBody>
+					{!filteredBillboards && (
+						<TRow>
+							<TRowData>
+								<Loader
+									color="black"
+									height="2rem"
+									width="2rem"
+								/>
+							</TRowData>
+						</TRow>
+					)}
 					{filteredBillboards?.map((billboard) => (
 						<TRow key={billboard._id}>
 							<TRowData>

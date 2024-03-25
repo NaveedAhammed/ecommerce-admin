@@ -3,74 +3,66 @@ import Button from "../components/Button";
 import Input from "../components/Input";
 import Label from "../components/Label";
 import Modal from "../components/Modal";
-import { AxiosError } from "axios";
-import toast from "react-hot-toast";
-import Loader from "../components/Loader";
-import Message from "../components/Message";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
-import {
-	addNewColor,
-	setColorData,
-	setColorEditMode,
-	setIsColorModalOpen,
-	updateColor,
-} from "../redux/slices/colorSlice";
+import toast from "react-hot-toast";
+import { AxiosError } from "axios";
+import Message from "../components/Message";
+import Loader from "../components/Loader";
 import { useAppDispatch, useAppSelector } from "../redux/store";
+import {
+	addNewParentCategory,
+	setParentCategoryData,
+	setParentCategoryEditMode,
+	setIsParentCategoryModalOpen,
+	updateParentCategory,
+} from "../redux/slices/parentCategorySlice";
 
-type InputFieldsState = {
-	name: boolean;
-	value: boolean;
-};
-
-const defaultState: InputFieldsState = {
-	name: false,
-	value: false,
-};
-
-const ManageColorModal = () => {
+const ManageParentCategoryModal = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const [hasInputFocused, setHasInputFocused] =
-		useState<InputFieldsState>(defaultState);
-	const [hasInputBlured, setHasInputBlured] =
-		useState<InputFieldsState>(defaultState);
+	const [hasNameFocused, setHasNameFocused] = useState<boolean>(false);
+	const [hasNameBlured, setHasNameBlured] = useState<boolean>(false);
 
-	const { isColorModalOpen, editMode, colorData } = useAppSelector(
-		(state) => state.colors
-	);
-
-	const firstInputRef = useRef<HTMLInputElement>(null);
+	const { isParentCategoryModalOpen, parentCategoryData, editMode } =
+		useAppSelector((state) => state.parentCategories);
 
 	const axiosPrivate = useAxiosPrivate();
 
 	const dispatch = useAppDispatch();
 
+	const firstInputRef = useRef<HTMLInputElement>(null);
+
 	const resetState = () => {
-		setHasInputBlured(defaultState);
-		setHasInputFocused(defaultState);
+		setHasNameBlured(false);
+		setHasNameFocused(false);
 	};
 
 	const handleCancel = () => {
-		dispatch(setIsColorModalOpen(false));
-		dispatch(setColorData(null));
-		dispatch(setColorEditMode(false));
+		dispatch(setIsParentCategoryModalOpen(false));
+		dispatch(setParentCategoryData(null));
+		dispatch(setParentCategoryEditMode(false));
 		resetState();
 	};
 
-	const handleCreateColor = async (formData: FormData) => {
+	const handleCreateCategory = async (formData: FormData) => {
 		try {
 			setIsLoading(true);
-			const res = (await axiosPrivate.post("/color/new", formData)).data;
+			const res = (
+				await axiosPrivate.post("/category/parent/new", formData)
+			).data;
 			console.log(res);
 			if (!res.success) {
-				return toast.error("Color creation failed, Please try again");
+				return toast.error(
+					"Parent category creation failed, Please try again"
+				);
 			}
 			if (res.success) {
-				dispatch(setIsColorModalOpen(false));
-				dispatch(addNewColor(res.data.color));
+				dispatch(setIsParentCategoryModalOpen(false));
+				dispatch(addNewParentCategory(res.data.parentCategory));
 				resetState();
 				return toast.success(res.message);
 			}
-		} catch (err: unknown) {
+			dispatch(addNewParentCategory(res.data.parentCategory));
+		} catch (err) {
 			console.log(err);
 			const error = err as AxiosError;
 			console.log(error);
@@ -84,27 +76,30 @@ const ManageColorModal = () => {
 		}
 	};
 
-	const handleUpdateColor = async (formData: FormData) => {
+	const handleUpdateCategory = async (formData: FormData) => {
 		try {
 			setIsLoading(true);
 			const res = (
 				await axiosPrivate.put(
-					`/color/update/${colorData?._id}`,
+					`/category/parent/update/${parentCategoryData?._id}`,
 					formData
 				)
 			).data;
 			console.log(res);
 			if (!res.success) {
-				return toast.error("Color creation failed, Please try again");
+				return toast.error(
+					"Parent category updation failed, Please try again"
+				);
 			}
 			if (res.success) {
-				dispatch(setIsColorModalOpen(false));
-				dispatch(setColorData(null));
-				dispatch(updateColor(res.data.color));
+				dispatch(setIsParentCategoryModalOpen(false));
+				dispatch(setParentCategoryEditMode(false));
+				dispatch(setParentCategoryData(null));
+				dispatch(updateParentCategory(res.data.category));
 				resetState();
 				return toast.success(res.message);
 			}
-		} catch (err: unknown) {
+		} catch (err) {
 			console.log(err);
 			const error = err as AxiosError;
 			console.log(error);
@@ -129,9 +124,9 @@ const ManageColorModal = () => {
 		if (isValid) {
 			const formData = new FormData(formElement);
 			if (editMode) {
-				handleUpdateColor(formData);
+				await handleUpdateCategory(formData);
 			} else {
-				handleCreateColor(formData);
+				await handleCreateCategory(formData);
 			}
 		}
 	};
@@ -142,52 +137,23 @@ const ManageColorModal = () => {
 			noValidate
 			onSubmit={handleOnSubmit}
 		>
-			<div className="flex flex-col gap-1">
-				<Label htmlFor="name">Name</Label>
+			<div className="flex flex-col col-span-2 gap-2">
+				<Label htmlFor="name">Parent Category</Label>
 				<Input
 					id="name"
-					defaultValue={colorData?.name}
+					defaultValue={parentCategoryData?.name}
 					autoComplete="off"
 					name="name"
 					type="text"
 					innerRef={firstInputRef}
-					disabled={isLoading}
-					onBlur={() =>
-						setHasInputBlured((prev) => ({ ...prev, name: true }))
-					}
-					onFocus={() =>
-						setHasInputFocused((prev) => ({ ...prev, name: true }))
-					}
-					className="peer"
 					required={true}
+					className="peer min-w-[24rem]"
+					onBlur={() => setHasNameBlured(true)}
+					onFocus={() => setHasNameFocused(true)}
 				/>
-				{hasInputFocused.name && hasInputBlured.name && (
+				{hasNameFocused && hasNameBlured && (
 					<Message error={true} className="hidden peer-invalid:block">
-						Color name is required
-					</Message>
-				)}
-			</div>
-			<div className="flex flex-col gap-1">
-				<Label htmlFor="value">Value</Label>
-				<Input
-					id="value"
-					defaultValue={colorData?.value}
-					autoComplete="off"
-					name="value"
-					type="text"
-					disabled={isLoading}
-					onBlur={() =>
-						setHasInputBlured((prev) => ({ ...prev, value: true }))
-					}
-					onFocus={() =>
-						setHasInputFocused((prev) => ({ ...prev, value: true }))
-					}
-					className="peer"
-					required={true}
-				/>
-				{hasInputFocused.value && hasInputBlured.value && (
-					<Message error={true} className="hidden peer-invalid:block">
-						Color value is required
+						Parent Category is required
 					</Message>
 				)}
 			</div>
@@ -227,19 +193,19 @@ const ManageColorModal = () => {
 
 	useEffect(() => {
 		firstInputRef.current && firstInputRef.current.focus();
-	}, [isColorModalOpen]);
+	}, [isParentCategoryModalOpen]);
 
 	return (
 		<Modal
-			isOpen={isColorModalOpen}
-			onClose={() => dispatch(setIsColorModalOpen(false))}
+			isOpen={isParentCategoryModalOpen}
+			onClose={() => dispatch(setIsParentCategoryModalOpen(false))}
 			body={body}
-			title={`${editMode ? "Edit" : "Create"} Color`}
+			title={`${editMode ? "Edit" : "Create"} Category`}
 			description={`${
 				editMode ? "Edit the" : "Create a new"
-			} color for your products`}
+			} parent category for you products`}
 		/>
 	);
 };
 
-export default ManageColorModal;
+export default ManageParentCategoryModal;

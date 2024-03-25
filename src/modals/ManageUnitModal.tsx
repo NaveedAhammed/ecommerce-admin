@@ -3,19 +3,19 @@ import Button from "../components/Button";
 import Input from "../components/Input";
 import Label from "../components/Label";
 import Modal from "../components/Modal";
-import { AxiosError } from "axios";
-import toast from "react-hot-toast";
-import Loader from "../components/Loader";
 import Message from "../components/Message";
+import Loader from "../components/Loader";
+import toast from "react-hot-toast";
+import { AxiosError } from "axios";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
-import {
-	addNewColor,
-	setColorData,
-	setColorEditMode,
-	setIsColorModalOpen,
-	updateColor,
-} from "../redux/slices/colorSlice";
 import { useAppDispatch, useAppSelector } from "../redux/store";
+import {
+	addNewUnit,
+	setIsUnitModalOpen,
+	setUnitData,
+	setUnitEditMode,
+	updateUnit,
+} from "../redux/slices/unitSlice";
 
 type InputFieldsState = {
 	name: boolean;
@@ -27,22 +27,22 @@ const defaultState: InputFieldsState = {
 	value: false,
 };
 
-const ManageColorModal = () => {
+const ManageUnitModal = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [hasInputFocused, setHasInputFocused] =
 		useState<InputFieldsState>(defaultState);
 	const [hasInputBlured, setHasInputBlured] =
 		useState<InputFieldsState>(defaultState);
 
-	const { isColorModalOpen, editMode, colorData } = useAppSelector(
-		(state) => state.colors
+	const { isUnitModalOpen, editMode, unitData } = useAppSelector(
+		(state) => state.units
 	);
 
-	const firstInputRef = useRef<HTMLInputElement>(null);
+	const dispatch = useAppDispatch();
 
 	const axiosPrivate = useAxiosPrivate();
 
-	const dispatch = useAppDispatch();
+	const firstInputRef = useRef<HTMLInputElement>(null);
 
 	const resetState = () => {
 		setHasInputBlured(defaultState);
@@ -50,23 +50,23 @@ const ManageColorModal = () => {
 	};
 
 	const handleCancel = () => {
-		dispatch(setIsColorModalOpen(false));
-		dispatch(setColorData(null));
-		dispatch(setColorEditMode(false));
+		dispatch(setIsUnitModalOpen(false));
+		dispatch(setUnitData(null));
+		dispatch(setUnitEditMode(false));
 		resetState();
 	};
 
-	const handleCreateColor = async (formData: FormData) => {
+	const handleCreateUnit = async (formData: FormData) => {
 		try {
 			setIsLoading(true);
-			const res = (await axiosPrivate.post("/color/new", formData)).data;
+			const res = (await axiosPrivate.post("/unit/new", formData)).data;
 			console.log(res);
 			if (!res.success) {
-				return toast.error("Color creation failed, Please try again");
+				return toast.error("Unit creation failed, Please try again");
 			}
 			if (res.success) {
-				dispatch(setIsColorModalOpen(false));
-				dispatch(addNewColor(res.data.color));
+				dispatch(setIsUnitModalOpen(false));
+				dispatch(addNewUnit(res.data.unit));
 				resetState();
 				return toast.success(res.message);
 			}
@@ -84,23 +84,24 @@ const ManageColorModal = () => {
 		}
 	};
 
-	const handleUpdateColor = async (formData: FormData) => {
+	const handleUpdateUnit = async (formData: FormData) => {
 		try {
 			setIsLoading(true);
 			const res = (
 				await axiosPrivate.put(
-					`/color/update/${colorData?._id}`,
+					`/unit/update/${unitData?._id}`,
 					formData
 				)
 			).data;
 			console.log(res);
 			if (!res.success) {
-				return toast.error("Color creation failed, Please try again");
+				return toast.error("Unit creation failed, Please try again");
 			}
 			if (res.success) {
-				dispatch(setIsColorModalOpen(false));
-				dispatch(setColorData(null));
-				dispatch(updateColor(res.data.color));
+				dispatch(setIsUnitModalOpen(false));
+				dispatch(setUnitData(null));
+				dispatch(updateUnit(res.data.unit));
+				dispatch(setUnitEditMode(false));
 				resetState();
 				return toast.success(res.message);
 			}
@@ -129,67 +130,79 @@ const ManageColorModal = () => {
 		if (isValid) {
 			const formData = new FormData(formElement);
 			if (editMode) {
-				handleUpdateColor(formData);
+				handleUpdateUnit(formData);
 			} else {
-				handleCreateColor(formData);
+				handleCreateUnit(formData);
 			}
 		}
 	};
 
 	const body: React.ReactNode = (
 		<form
-			className="grid grid-cols-2 gap-6"
-			noValidate
+			className="flex flex-col gap-3"
 			onSubmit={handleOnSubmit}
+			noValidate
 		>
-			<div className="flex flex-col gap-1">
+			<div className="flex flex-col gap-2">
 				<Label htmlFor="name">Name</Label>
 				<Input
 					id="name"
-					defaultValue={colorData?.name}
+					defaultValue={unitData?.name}
 					autoComplete="off"
 					name="name"
 					type="text"
-					innerRef={firstInputRef}
-					disabled={isLoading}
+					required={true}
 					onBlur={() =>
 						setHasInputBlured((prev) => ({ ...prev, name: true }))
 					}
 					onFocus={() =>
 						setHasInputFocused((prev) => ({ ...prev, name: true }))
 					}
-					className="peer"
-					required={true}
+					innerRef={firstInputRef}
+					disabled={isLoading}
+					className="peer min-w-[24rem]"
 				/>
-				{hasInputFocused.name && hasInputBlured.name && (
+				{hasInputBlured.name && hasInputFocused.name && (
 					<Message error={true} className="hidden peer-invalid:block">
-						Color name is required
+						Unit name is required
 					</Message>
 				)}
 			</div>
-			<div className="flex flex-col gap-1">
+			<div className="flex flex-col gap-2">
 				<Label htmlFor="value">Value</Label>
 				<Input
 					id="value"
-					defaultValue={colorData?.value}
+					defaultValue={unitData?.value}
 					autoComplete="off"
 					name="value"
 					type="text"
 					disabled={isLoading}
+					required={true}
 					onBlur={() =>
 						setHasInputBlured((prev) => ({ ...prev, value: true }))
 					}
 					onFocus={() =>
 						setHasInputFocused((prev) => ({ ...prev, value: true }))
 					}
-					className="peer"
-					required={true}
+					className="peer min-w-[24rem]"
 				/>
-				{hasInputFocused.value && hasInputBlured.value && (
+				{hasInputBlured.value && hasInputFocused.value && (
 					<Message error={true} className="hidden peer-invalid:block">
-						Color value is required
+						Unit value is required
 					</Message>
 				)}
+			</div>
+			<div className="flex flex-col gap-2">
+				<Label htmlFor="value">Short Hand</Label>
+				<Input
+					id="shortHand"
+					defaultValue={unitData?.shortHand}
+					autoComplete="off"
+					name="shortHand"
+					type="text"
+					disabled={isLoading}
+					className="min-w-[24rem]"
+				/>
 			</div>
 			<div className="flex gap-2 items-center justify-end col-span-2">
 				<Button onClick={handleCancel} size="default" varient="outline">
@@ -227,19 +240,19 @@ const ManageColorModal = () => {
 
 	useEffect(() => {
 		firstInputRef.current && firstInputRef.current.focus();
-	}, [isColorModalOpen]);
+	}, [isUnitModalOpen]);
 
 	return (
 		<Modal
-			isOpen={isColorModalOpen}
-			onClose={() => dispatch(setIsColorModalOpen(false))}
+			isOpen={isUnitModalOpen}
+			onClose={() => dispatch(setIsUnitModalOpen(false))}
 			body={body}
-			title={`${editMode ? "Edit" : "Create"} Color`}
+			title={`${editMode ? "Edit" : "Create"} Unit`}
 			description={`${
 				editMode ? "Edit the" : "Create a new"
-			} color for your products`}
+			} unit for your products`}
 		/>
 	);
 };
 
-export default ManageColorModal;
+export default ManageUnitModal;

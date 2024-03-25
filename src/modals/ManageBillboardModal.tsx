@@ -28,7 +28,9 @@ const ManageBillboardModal = () => {
 		useState<boolean>(false);
 	const [hasCategoryBlured, setHasCategoryBlured] = useState<boolean>(false);
 
-	const { categories } = useAppSelector((state) => state.categories);
+	const { parentCategories } = useAppSelector(
+		(state) => state.parentCategories
+	);
 	const { billboardData, editMode, isBillboardModalOpen } = useAppSelector(
 		(state) => state.billboards
 	);
@@ -54,32 +56,81 @@ const ManageBillboardModal = () => {
 	};
 
 	const handleCreateBillboard = async (formData: FormData) => {
-		const res = (
-			await axiosPrivate.post("/billboard/new", formData, {
-				headers: {
-					"Content-Type": "multipart/form-data",
-				},
-			})
-		).data;
-		dispatch(addNewBillboard(res.data.billboard));
-		return res;
-	};
-
-	const handleUpdateBillboard = async (formData: FormData) => {
-		console.log(formData.get("image"));
-		const res = (
-			await axiosPrivate.put(
-				`/billboard/update/${billboardData?._id}`,
-				formData,
-				{
+		try {
+			setIsLoading(true);
+			const res = (
+				await axiosPrivate.post("/billboard/new", formData, {
 					headers: {
 						"Content-Type": "multipart/form-data",
 					},
-				}
-			)
-		).data;
-		dispatch(updateBillboard(res.data.billboard));
-		return res;
+				})
+			).data;
+			console.log(res);
+			if (!res.success) {
+				return toast.error(
+					"Billboard creation failed, Please try again"
+				);
+			}
+			if (res.success) {
+				dispatch(setIsBillboardModalOpen(false));
+				dispatch(addNewBillboard(res.data.billboard));
+				resetState();
+				return toast.success(res.message);
+			}
+		} catch (err: unknown) {
+			console.log(err);
+			const error = err as AxiosError;
+			console.log(error);
+			if (!error?.response) {
+				return toast.error("Something went wrong");
+			} else {
+				return toast.error(`${error.response?.data?.message}`);
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const handleUpdateBillboard = async (formData: FormData) => {
+		try {
+			setIsLoading(true);
+			const res = (
+				await axiosPrivate.put(
+					`/billboard/update/${billboardData?._id}`,
+					formData,
+					{
+						headers: {
+							"Content-Type": "multipart/form-data",
+						},
+					}
+				)
+			).data;
+			console.log(res);
+			if (!res.success) {
+				return toast.error(
+					"Billboard creation failed, Please try again"
+				);
+			}
+			if (res.success) {
+				dispatch(setIsBillboardModalOpen(false));
+				dispatch(setBillboardData(null));
+				dispatch(updateBillboard(res.data.billboard));
+				dispatch(setBillboardEditMode(false));
+				resetState();
+				return toast.success(res.message);
+			}
+		} catch (err: unknown) {
+			console.log(err);
+			const error = err as AxiosError;
+			console.log(error);
+			if (!error?.response) {
+				return toast.error("Something went wrong");
+			} else {
+				return toast.error(`${error.response?.data?.message}`);
+			}
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -92,37 +143,10 @@ const ManageBillboardModal = () => {
 		firstInvalidField?.focus();
 		if (isValid) {
 			const formData = new FormData(formElement);
-			try {
-				setIsLoading(true);
-				let res;
-				if (editMode) {
-					res = await handleUpdateBillboard(formData);
-				} else {
-					res = await handleCreateBillboard(formData);
-				}
-				console.log(res);
-				if (!res.success) {
-					return toast.error(
-						"Billboard creation failed, Please try again"
-					);
-				}
-				if (res.success) {
-					dispatch(setIsBillboardModalOpen(false));
-					resetState();
-					dispatch(addNewBillboard(res.data.billboard));
-					return toast.success(res.message);
-				}
-			} catch (err: unknown) {
-				console.log(err);
-				const error = err as AxiosError;
-				console.log(error);
-				if (!error?.response) {
-					return toast.error("Something went wrong");
-				} else {
-					return toast.error(`${error.response?.data?.message}`);
-				}
-			} finally {
-				setIsLoading(false);
+			if (editMode) {
+				handleUpdateBillboard(formData);
+			} else {
+				handleCreateBillboard(formData);
 			}
 		}
 	};
@@ -160,9 +184,9 @@ const ManageBillboardModal = () => {
 					<Select
 						name="categoryId"
 						id="categoryId"
-						options={categories?.map((category) => ({
-							id: category?._id,
-							name: category?.name,
+						options={parentCategories?.map((parentCategory) => ({
+							id: parentCategory?._id,
+							name: parentCategory?.name,
 						}))}
 						defaultValue={billboardData?.category?._id}
 						required={true}

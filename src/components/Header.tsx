@@ -29,11 +29,14 @@ const Header = () => {
 					<NavLink to="/billboards" className={activeLink}>
 						Billboards
 					</NavLink>
-					<NavLink to="/categories" className={activeLink}>
-						Categories
+					<NavLink to="/parentCategories" className={activeLink}>
+						Parent Categories
 					</NavLink>
-					<NavLink to="/sizes" className={activeLink}>
-						Sizes
+					<NavLink to="/childCategories" className={activeLink}>
+						Child Categories
+					</NavLink>
+					<NavLink to="/units" className={activeLink}>
+						Units
 					</NavLink>
 					<NavLink to="/colors" className={activeLink}>
 						Colors

@@ -3,9 +3,17 @@ export type ImageType = {
 	_id: string;
 };
 
-export type CategoryType = {
-	name: string;
+export type ParentCategoryType = {
 	_id: string;
+	name: string;
+	createdAt: string;
+	updatedAt: string;
+};
+
+export type ChildCategoryType = {
+	_id: string;
+	parentCategory: ParentCategoryType;
+	name: string;
 	createdAt: string;
 	updatedAt: string;
 };
@@ -14,23 +22,24 @@ export type BillboardType = {
 	_id: string;
 	title: string;
 	imageUrl?: string;
-	category: CategoryType;
+	category: ParentCategoryType;
 	createdAt: string;
 	updatedAt: string;
 };
 
 export type ColorType = {
+	_id: string;
 	name: string;
 	value: string;
-	_id: string;
 	createdAt: string;
 	updatedAt: string;
 };
 
-export type SizeType = {
+export type UnitType = {
+	_id: string;
 	name: string;
 	value: string;
-	_id: string;
+	shortHand?: string;
 	createdAt: string;
 	updatedAt: string;
 };
@@ -43,9 +52,10 @@ export type ProductType = {
 	discount: number | string;
 	stock: number | string;
 	images: ImageType[];
-	category: CategoryType;
+	parentCategory: ParentCategoryType;
+	category: ChildCategoryType;
 	color: ColorType;
-	size: SizeType;
+	unit: UnitType;
 	featured: boolean;
 	createdAt: string;
 	updatedAt: string;

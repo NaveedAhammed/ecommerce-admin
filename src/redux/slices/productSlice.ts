@@ -26,10 +26,7 @@ const productSlice = createSlice({
 	reducers: {
 		setProducts(state, action) {
 			state.products = action.payload.products;
-			state.totalProducts = action.payload.totalProducts;
-		},
-		addProduct(state, action) {
-			state.products.push(action.payload);
+			state.totalProducts = action.payload?.totalProducts;
 		},
 		removeProduct(state, action) {
 			state.products = state.products.filter(
@@ -41,9 +38,10 @@ const productSlice = createSlice({
 		},
 		updateProduct(state, action) {
 			const indexOfProduct = state.products.findIndex(
-				(item) => item._id === action.payload._id
+				(item) => item._id === action.payload.product._id
 			);
-			state.products[indexOfProduct] = action.payload;
+			state.products[indexOfProduct] = action.payload.product;
+			state.totalProducts = action.payload.totalProducts;
 		},
 		removeProductImage(state, action) {
 			const indexOfProduct = state.products.findIndex(
@@ -66,12 +64,14 @@ const productSlice = createSlice({
 		addNewProduct(state, action) {
 			state.products.push(action.payload);
 		},
+		setTotalProducts(state, action) {
+			state.totalProducts = action.payload;
+		},
 	},
 });
 
 export const {
 	setProducts,
-	addProduct,
 	removeProduct,
 	setPageNum,
 	updateProduct,
@@ -80,6 +80,7 @@ export const {
 	setIsProductModalOpen,
 	setProductData,
 	setProductEditMode,
+	setTotalProducts,
 } = productSlice.actions;
 
 export default productSlice.reducer;
