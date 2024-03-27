@@ -3,14 +3,18 @@ import useAdminContext from "./hooks/useAdminContext";
 import { AdminContextType } from "./context/AdminContext";
 
 const ProtectedLayout = () => {
-  const { adminState } = useAdminContext() as AdminContextType;
-  const location = useLocation();
-  const redirect =
-    location.pathname === "/" ? "/" : location.pathname.replace("/", "");
-  if (!adminState) {
-    return <Navigate to={`/login?redirect=${redirect}`} />;
-  }
-  return <Outlet />;
+	const { adminState } = useAdminContext() as AdminContextType;
+	const location = useLocation();
+	if (!adminState) {
+		return (
+			<Navigate
+				to={`/login?redirect=${location.pathname}`}
+				replace
+				state={{ redirect: location }}
+			/>
+		);
+	}
+	return <Outlet />;
 };
 
 export default ProtectedLayout;

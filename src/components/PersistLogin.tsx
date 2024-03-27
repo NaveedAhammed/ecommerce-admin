@@ -9,6 +9,7 @@ const PersistLogin = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const refresh = useRefreshToken();
 	const { adminState } = useAdminContext() as AdminContextType;
+	const isLoggedIn = localStorage.getItem("isLoggedIn");
 
 	useEffect(() => {
 		const verifyRefreshToken = async () => {
@@ -22,8 +23,11 @@ const PersistLogin = () => {
 			}
 		};
 
-		!adminState?.accessToken && verifyRefreshToken();
-	}, [adminState, refresh]);
+		isLoggedIn &&
+			isLoggedIn === "true" &&
+			!adminState?.accessToken &&
+			verifyRefreshToken();
+	}, [adminState, refresh, isLoggedIn]);
 
 	return (
 		<div
