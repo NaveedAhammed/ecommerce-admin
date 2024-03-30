@@ -18,7 +18,7 @@ import {
 } from "../redux/slices/unitSlice";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import toast from "react-hot-toast";
-import { AxiosError } from "axios";
+import axios from "axios";
 import { UnitType } from "../types";
 import { useState } from "react";
 import ControlledInput from "../components/ControlledInput";
@@ -57,13 +57,14 @@ const Units = () => {
 				return "Deleted successfully";
 			},
 			error: (err) => {
-				const error = err as AxiosError;
-				console.log(error);
-				if (!error?.response) {
-					return "Something went wrong";
-				} else {
-					return `${error.response?.data?.message}`;
+				if (axios.isAxiosError<{ message: string }>(err)) {
+					if (!err?.response) {
+						return "Something went wrong";
+					} else {
+						return `${err.response?.data?.message}`;
+					}
 				}
+				return "Unexpected error!";
 			},
 		});
 	};

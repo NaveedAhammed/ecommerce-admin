@@ -6,7 +6,6 @@ import Modal from "../components/Modal";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
-import { AxiosError } from "axios";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import Select from "../components/Select";
@@ -19,6 +18,7 @@ import {
 	setIsBillboardModalOpen,
 	updateBillboard,
 } from "../redux/slices/billboardSlice";
+import { errorHandler } from "../utils/errorHandler";
 
 const ManageBillboardModal = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -55,85 +55,59 @@ const ManageBillboardModal = () => {
 		resetState();
 	};
 
-	const handleCreateBillboard = async (formData: FormData) => {
-		try {
-			setIsLoading(true);
-			const res = (
-				await axiosPrivate.post("/billboard/new", formData, {
-					headers: {
-						"Content-Type": "multipart/form-data",
-					},
-				})
-			).data;
-			console.log(res);
-			if (!res.success) {
-				return toast.error(
-					"Billboard creation failed, Please try again"
-				);
-			}
-			if (res.success) {
+	const handleCreateBillboard = (formData: FormData) => {
+		setIsLoading(true);
+		axiosPrivate
+			.post("/billboard/new", formData, {
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			})
+			.then((res) => {
+				if (!res.data.success) {
+					return toast.error(
+						"Billboard creation failed, Please try again"
+					);
+				}
 				dispatch(setIsBillboardModalOpen(false));
-				dispatch(addNewBillboard(res.data.billboard));
+				dispatch(addNewBillboard(res.data.data.billboard));
 				resetState();
-				return toast.success(res.message);
-			}
-		} catch (err: unknown) {
-			console.log(err);
-			const error = err as AxiosError;
-			console.log(error);
-			if (!error?.response) {
-				return toast.error("Something went wrong");
-			} else {
-				return toast.error(`${error.response?.data?.message}`);
-			}
-		} finally {
-			setIsLoading(false);
-		}
+				return toast.success(res.data.message);
+			})
+			.catch(errorHandler)
+			.finally(() => {
+				setIsLoading(false);
+			});
 	};
 
-	const handleUpdateBillboard = async (formData: FormData) => {
-		try {
-			setIsLoading(true);
-			const res = (
-				await axiosPrivate.put(
-					`/billboard/update/${billboardData?._id}`,
-					formData,
-					{
-						headers: {
-							"Content-Type": "multipart/form-data",
-						},
-					}
-				)
-			).data;
-			console.log(res);
-			if (!res.success) {
-				return toast.error(
-					"Billboard creation failed, Please try again"
-				);
-			}
-			if (res.success) {
+	const handleUpdateBillboard = (formData: FormData) => {
+		setIsLoading(true);
+		axiosPrivate
+			.put(`/billboard/update/${billboardData?._id}`, formData, {
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			})
+			.then((res) => {
+				if (!res.data.success) {
+					return toast.error(
+						"Billboard creation failed, Please try again"
+					);
+				}
 				dispatch(setIsBillboardModalOpen(false));
 				dispatch(setBillboardData(null));
-				dispatch(updateBillboard(res.data.billboard));
+				dispatch(updateBillboard(res.data.data.billboard));
 				dispatch(setBillboardEditMode(false));
 				resetState();
-				return toast.success(res.message);
-			}
-		} catch (err: unknown) {
-			console.log(err);
-			const error = err as AxiosError;
-			console.log(error);
-			if (!error?.response) {
-				return toast.error("Something went wrong");
-			} else {
-				return toast.error(`${error.response?.data?.message}`);
-			}
-		} finally {
-			setIsLoading(false);
-		}
+				return toast.success(res.data.message);
+			})
+			.catch(errorHandler)
+			.finally(() => {
+				setIsLoading(false);
+			});
 	};
 
-	const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+	const handleOnSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		const formElement = e.target as HTMLFormElement;
 		const isValid = formElement.checkValidity();

@@ -5,7 +5,6 @@ import Label from "../components/Label";
 import Modal from "../components/Modal";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import toast from "react-hot-toast";
-import { AxiosError } from "axios";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
 import { useAppDispatch, useAppSelector } from "../redux/store";
@@ -16,6 +15,7 @@ import {
 	setIsParentCategoryModalOpen,
 	updateParentCategory,
 } from "../redux/slices/parentCategorySlice";
+import { errorHandler } from "../utils/errorHandler";
 
 const ManageParentCategoryModal = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -43,77 +43,51 @@ const ManageParentCategoryModal = () => {
 		resetState();
 	};
 
-	const handleCreateCategory = async (formData: FormData) => {
-		try {
-			setIsLoading(true);
-			const res = (
-				await axiosPrivate.post("/category/parent/new", formData)
-			).data;
-			console.log(res);
-			if (!res.success) {
-				return toast.error(
-					"Parent category creation failed, Please try again"
-				);
-			}
-			if (res.success) {
+	const handleCreateCategory = (formData: FormData) => {
+		setIsLoading(true);
+		axiosPrivate
+			.post("/category/parent/new", formData)
+			.then((res) => {
+				if (!res.data.success) {
+					return toast.error(
+						"Parent category creation failed, Please try again"
+					);
+				}
 				dispatch(setIsParentCategoryModalOpen(false));
-				dispatch(addNewParentCategory(res.data.parentCategory));
+				dispatch(addNewParentCategory(res.data.data.parentCategory));
 				resetState();
-				return toast.success(res.message);
-			}
-			dispatch(addNewParentCategory(res.data.parentCategory));
-		} catch (err) {
-			console.log(err);
-			const error = err as AxiosError;
-			console.log(error);
-			if (!error?.response) {
-				return toast.error("Something went wrong");
-			} else {
-				return toast.error(`${error.response?.data?.message}`);
-			}
-		} finally {
-			setIsLoading(false);
-		}
+				return toast.success(res.data.message);
+			})
+			.catch(errorHandler)
+			.finally(() => {
+				setIsLoading(false);
+			});
 	};
 
-	const handleUpdateCategory = async (formData: FormData) => {
-		try {
-			setIsLoading(true);
-			const res = (
-				await axiosPrivate.put(
-					`/category/parent/update/${parentCategoryData?._id}`,
-					formData
-				)
-			).data;
-			console.log(res);
-			if (!res.success) {
-				return toast.error(
-					"Parent category updation failed, Please try again"
-				);
-			}
-			if (res.success) {
+	const handleUpdateCategory = (formData: FormData) => {
+		setIsLoading(true);
+		axiosPrivate
+			.put(`/category/parent/update/${parentCategoryData?._id}`, formData)
+			.then((res) => {
+				if (!res.data.success) {
+					return toast.error(
+						"Parent category updation failed, Please try again"
+					);
+				}
 				dispatch(setIsParentCategoryModalOpen(false));
 				dispatch(setParentCategoryEditMode(false));
 				dispatch(setParentCategoryData(null));
-				dispatch(updateParentCategory(res.data.category));
+				dispatch(updateParentCategory(res.data.data.category));
 				resetState();
-				return toast.success(res.message);
-			}
-		} catch (err) {
-			console.log(err);
-			const error = err as AxiosError;
-			console.log(error);
-			if (!error?.response) {
-				return toast.error("Something went wrong");
-			} else {
-				return toast.error(`${error.response?.data?.message}`);
-			}
-		} finally {
-			setIsLoading(false);
-		}
+				return toast.success(res.data.message);
+			})
+			.catch(errorHandler)
+			.finally(() => {
+				setIsLoading(false);
+			});
 	};
 
-	const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+	const handleOnSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		const formElement = e.target as HTMLFormElement;
 		const isValid = formElement.checkValidity();
@@ -124,9 +98,9 @@ const ManageParentCategoryModal = () => {
 		if (isValid) {
 			const formData = new FormData(formElement);
 			if (editMode) {
-				await handleUpdateCategory(formData);
+				handleUpdateCategory(formData);
 			} else {
-				await handleCreateCategory(formData);
+				handleCreateCategory(formData);
 			}
 		}
 	};

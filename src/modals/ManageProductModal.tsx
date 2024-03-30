@@ -9,11 +9,12 @@ import { ChangeEvent, DragEvent, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import Message from "../components/Message";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
-import { AxiosError } from "axios";
+import axios from "axios";
 import Loader from "../components/Loader";
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import {
 	addNewProduct,
+	removeProductImage,
 	setIsProductModalOpen,
 	setProductData,
 	setProductEditMode,
@@ -21,6 +22,7 @@ import {
 	updateProduct,
 } from "../redux/slices/productSlice";
 import ControlledSelect from "../components/ControlledSelect";
+import { errorHandler } from "../utils/errorHandler";
 
 type InputFieldsState = {
 	title: boolean;
@@ -80,7 +82,6 @@ const ManageProductModal = () => {
 
 	const handleImagesSelect = (e: ChangeEvent<HTMLInputElement>): void => {
 		const files: FileList | null = e.target.files;
-		console.log(files);
 		if (files?.length && files.length > 0) {
 			for (let i = 0; i < files?.length; i++) {
 				if (!images.some((img) => img.name === files[i].name)) {
@@ -155,99 +156,82 @@ const ManageProductModal = () => {
 		toast.promise(res, {
 			loading: "Deleting the image...",
 			success: (res) => {
-				// removeImage(imageId);
-				// dispatch(removeProductImage({ imageId, productId: data?._id }));
+				dispatch(
+					removeProductImage({ imageId, productId: productData?._id })
+				);
 				return res.data.message;
 			},
 			error: (err) => {
-				const error = err as AxiosError;
-				console.log(error);
-				if (!error?.response) {
-					return "Something went wrong";
-				} else {
-					return `${error.response?.data?.message}`;
+				if (axios.isAxiosError<{ message: string }>(err)) {
+					if (!err?.response) {
+						return "Something went wrong";
+					} else {
+						return `${err.response?.data?.message}`;
+					}
 				}
+				return "Unexpected error!";
 			},
 		});
 	};
 
-	const handleCreateProduct = async (formData: FormData) => {
-		try {
-			setIsLoading(true);
-			const res = (
-				await axiosPrivate.post("/product/new", formData, {
-					headers: {
-						"Content-Type": "multipart/form-data",
-					},
-				})
-			).data;
-			if (!res.success) {
-				return toast.error("Product creation failed, Please try again");
-			}
-			if (res.success) {
+	const handleCreateProduct = (formData: FormData) => {
+		setIsLoading(true);
+		axiosPrivate
+			.post("/product/new", formData, {
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			})
+			.then((res) => {
+				if (!res.data.success) {
+					return toast.error(
+						"Product creation failed, Please try again"
+					);
+				}
+
 				products.length < 5 &&
-					dispatch(addNewProduct(res.data.product));
-				dispatch(setTotalProducts(res.data.totalProducts));
+					dispatch(addNewProduct(res.data.data.product));
+				dispatch(setTotalProducts(res.data.data.totalProducts));
 				dispatch(setIsProductModalOpen(false));
 				resetState();
-				return toast.success(res.message);
-			}
-		} catch (err) {
-			console.log(err);
-			const error = err as AxiosError;
-			console.log(error);
-			if (!error?.response) {
-				return toast.error("Something went wrong");
-			} else {
-				return toast.error(`${error.response?.data?.message}`);
-			}
-		} finally {
-			setIsLoading(false);
-		}
+				return toast.success(res.data.message);
+			})
+			.catch(errorHandler)
+			.finally(() => {
+				setIsLoading(false);
+			});
 	};
 
-	const handleUpdateProduct = async (formData: FormData) => {
-		try {
-			setIsLoading(true);
-			const res = (
-				await axiosPrivate.put(
-					`/product/update/${productData?._id}`,
-					formData,
-					{
-						headers: {
-							"Content-Type": "multipart/form-data",
-						},
-					}
-				)
-			).data;
-			if (!res.success) {
-				return toast.error("Product updation failed, Please try again");
-			}
-			if (res.success) {
+	const handleUpdateProduct = (formData: FormData) => {
+		setIsLoading(true);
+		axiosPrivate
+			.put(`/product/update/${productData?._id}`, formData, {
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			})
+			.then((res) => {
+				if (!res.data.success) {
+					return toast.error(
+						"Product updation failed, Please try again"
+					);
+				}
 				dispatch(
 					updateProduct({
-						product: res.data.product,
-						totalProducts: res.data.totalProducts,
+						product: res.data.data.product,
+						totalProducts: res.data.data.totalProducts,
 					})
 				);
 				dispatch(setProductData(null));
 				dispatch(setProductEditMode(false));
 				dispatch(setIsProductModalOpen(false));
 				resetState();
-				return toast.success(res.message);
-			}
-		} catch (err) {
-			console.log(err);
-			const error = err as AxiosError;
-			console.log(error);
-			if (!error?.response) {
-				return toast.error("Something went wrong");
-			} else {
-				return toast.error(`${error.response?.data?.message}`);
-			}
-		} finally {
-			setIsLoading(false);
-		}
+				return toast.success(res.data.message);
+			})
+			.catch(errorHandler)
+			.finally(() => {
+				setIsLoading(false);
+			});
 	};
 
 	const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

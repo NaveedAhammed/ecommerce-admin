@@ -3,7 +3,7 @@ import { AdminType } from "../types";
 
 export type AdminContextType = {
 	adminState: AdminType | null;
-	setAdmin: (admin: AdminType) => void;
+	setAdminState: React.Dispatch<React.SetStateAction<AdminType | null>>;
 };
 
 export const AdminContextProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -11,15 +11,11 @@ export const AdminContextProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
 	const [adminState, setAdminState] = useState<AdminType | null>(null);
 
-	const setAdmin = (admin: AdminType) => {
-		setAdminState(admin);
-	};
-
 	return (
 		<AdminContext.Provider
 			value={{
 				adminState,
-				setAdmin,
+				setAdminState,
 			}}
 		>
 			{children}

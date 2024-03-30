@@ -6,7 +6,6 @@ import Modal from "../components/Modal";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
-import { AxiosError } from "axios";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import {
@@ -16,6 +15,7 @@ import {
 	setUnitEditMode,
 	updateUnit,
 } from "../redux/slices/unitSlice";
+import { errorHandler } from "../utils/errorHandler";
 
 type InputFieldsState = {
 	name: boolean;
@@ -56,70 +56,51 @@ const ManageUnitModal = () => {
 		resetState();
 	};
 
-	const handleCreateUnit = async (formData: FormData) => {
-		try {
-			setIsLoading(true);
-			const res = (await axiosPrivate.post("/unit/new", formData)).data;
-			console.log(res);
-			if (!res.success) {
-				return toast.error("Unit creation failed, Please try again");
-			}
-			if (res.success) {
+	const handleCreateUnit = (formData: FormData) => {
+		setIsLoading(true);
+		axiosPrivate
+			.post("/unit/new", formData)
+			.then((res) => {
+				if (!res.data.success) {
+					return toast.error(
+						"Unit creation failed, Please try again"
+					);
+				}
 				dispatch(setIsUnitModalOpen(false));
 				dispatch(addNewUnit(res.data.unit));
 				resetState();
-				return toast.success(res.message);
-			}
-		} catch (err: unknown) {
-			console.log(err);
-			const error = err as AxiosError;
-			console.log(error);
-			if (!error?.response) {
-				return toast.error("Something went wrong");
-			} else {
-				return toast.error(`${error.response?.data?.message}`);
-			}
-		} finally {
-			setIsLoading(false);
-		}
+				return toast.success(res.data.message);
+			})
+			.catch(errorHandler)
+			.finally(() => {
+				setIsLoading(false);
+			});
 	};
 
-	const handleUpdateUnit = async (formData: FormData) => {
-		try {
-			setIsLoading(true);
-			const res = (
-				await axiosPrivate.put(
-					`/unit/update/${unitData?._id}`,
-					formData
-				)
-			).data;
-			console.log(res);
-			if (!res.success) {
-				return toast.error("Unit creation failed, Please try again");
-			}
-			if (res.success) {
+	const handleUpdateUnit = (formData: FormData) => {
+		setIsLoading(true);
+		axiosPrivate
+			.put(`/unit/update/${unitData?._id}`, formData)
+			.then((res) => {
+				if (!res.data.success) {
+					return toast.error(
+						"Unit creation failed, Please try again"
+					);
+				}
 				dispatch(setIsUnitModalOpen(false));
 				dispatch(setUnitData(null));
 				dispatch(updateUnit(res.data.unit));
 				dispatch(setUnitEditMode(false));
 				resetState();
-				return toast.success(res.message);
-			}
-		} catch (err: unknown) {
-			console.log(err);
-			const error = err as AxiosError;
-			console.log(error);
-			if (!error?.response) {
-				return toast.error("Something went wrong");
-			} else {
-				return toast.error(`${error.response?.data?.message}`);
-			}
-		} finally {
-			setIsLoading(false);
-		}
+				return toast.success(res.data.message);
+			})
+			.catch(errorHandler)
+			.finally(() => {
+				setIsLoading(false);
+			});
 	};
 
-	const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+	const handleOnSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		const formElement = e.target as HTMLFormElement;
 		const isValid = formElement.checkValidity();

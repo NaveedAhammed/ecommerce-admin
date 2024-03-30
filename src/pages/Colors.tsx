@@ -19,7 +19,7 @@ import {
 	setColorsPageNum,
 	setIsColorModalOpen,
 } from "../redux/slices/colorSlice";
-import { AxiosError } from "axios";
+import axios from "axios";
 import { useState } from "react";
 import Button from "../components/Button";
 import ControlledInput from "../components/ControlledInput";
@@ -58,13 +58,14 @@ const Colors = () => {
 				return "Deleted successfully";
 			},
 			error: (err) => {
-				const error = err as AxiosError;
-				console.log(error);
-				if (!error?.response) {
-					return "Something went wrong";
-				} else {
-					return `${error.response?.data?.message}`;
+				if (axios.isAxiosError<{ message: string }>(err)) {
+					if (!err?.response) {
+						return "Something went wrong";
+					} else {
+						return `${err.response?.data?.message}`;
+					}
 				}
+				return "Unexpected error!";
 			},
 		});
 	};

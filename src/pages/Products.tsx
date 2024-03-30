@@ -22,10 +22,11 @@ import dayjs from "dayjs";
 import Button from "../components/Button";
 import { ProductType } from "../types";
 import toast from "react-hot-toast";
-import { AxiosError } from "axios";
+import axios from "axios";
 import ControlledInput from "../components/ControlledInput";
 import Loader from "../components/Loader";
 import { correncyFormatter } from "../utils/correncyFormat";
+import { errorHandler } from "../utils/errorHandler";
 
 const Products = () => {
 	const { products, pageNum, productsPerPage, totalProducts } =
@@ -48,10 +49,8 @@ const Products = () => {
 		dispatch(setIsProductModalOpen(true));
 	};
 
-	const handleActionDelete = async (product: ProductType) => {
-		const res = (
-			await axiosPrivate.delete(`/product/delete/${product._id}`)
-		).data;
+	const handleActionDelete = (product: ProductType) => {
+		const res = axiosPrivate.delete(`/product/delete/${product._id}`);
 		toast.promise(res, {
 			loading: `Deleting the product ${product.title}`,
 			success: () => {
@@ -59,13 +58,14 @@ const Products = () => {
 				return "Deleted successfully";
 			},
 			error: (err) => {
-				const error = err as AxiosError;
-				console.log(error);
-				if (!error?.response) {
-					return "Something went wrong";
-				} else {
-					return `${error.response?.data?.message}`;
+				if (axios.isAxiosError<{ message: string }>(err)) {
+					if (!err?.response) {
+						return "Something went wrong";
+					} else {
+						return `${err.response?.data?.message}`;
+					}
 				}
+				return "Unexpected error!";
 			},
 		});
 	};
@@ -81,24 +81,22 @@ const Products = () => {
 	};
 
 	useEffect(() => {
-		const fetchProducts = async () => {
-			try {
-				setIsLoading(true);
-				const res = (
-					await axiosPrivate.get(`/products?page=${pageNum}`)
-				).data;
-				dispatch(
-					setProducts({
-						products: res.data.products,
-						totalProducts: res.data.totalProducts,
-					})
-				);
-				console.log(res.data);
-			} catch (err) {
-				console.log(err);
-			} finally {
-				setIsLoading(false);
-			}
+		const fetchProducts = () => {
+			setIsLoading(true);
+			axiosPrivate
+				.get(`/products?page=${pageNum}`)
+				.then((res) => {
+					dispatch(
+						setProducts({
+							products: res.data.data.products,
+							totalProducts: res.data.data.totalProducts,
+						})
+					);
+				})
+				.catch(errorHandler)
+				.finally(() => {
+					setIsLoading(false);
+				});
 		};
 
 		products.length === 0 && fetchProducts();

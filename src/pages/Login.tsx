@@ -7,12 +7,12 @@ import Label from "../components/Label";
 import Loader from "../components/Loader";
 import Message from "../components/Message";
 import { privateAxios } from "../utils/axios";
-import { AxiosError } from "axios";
 import toast from "react-hot-toast";
 import useAdminContext from "../hooks/useAdminContext";
 import { AdminContextType } from "../context/AdminContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AdminType } from "../types";
+import { errorHandler } from "../utils/errorHandler";
 
 const Login = () => {
 	const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
@@ -27,7 +27,7 @@ const Login = () => {
 
 	const usernameOrEmailRef = useRef<HTMLInputElement>(null);
 
-	const { setAdmin, adminState } = useAdminContext() as AdminContextType;
+	const { setAdminState, adminState } = useAdminContext() as AdminContextType;
 
 	const navigate = useNavigate();
 
@@ -43,32 +43,26 @@ const Login = () => {
 		firstInvalidField?.focus();
 		if (isValid) {
 			const formData = new FormData(formElement);
-			try {
-				setIsLoading(true);
-				const res = (await privateAxios.post("/login", formData)).data;
-				if (!res.success) {
-					return toast.error("Login failed, Please try again");
-				}
-				const { user, accessToken } = res.data;
-				const admin: AdminType = {
-					username: user.username,
-					accessToken,
-					id: user.id,
-					avatar: user?.avatar,
-				};
-				setAdmin(admin);
-			} catch (err: unknown) {
-				console.log(err);
-				const error = err as AxiosError;
-				console.log(error);
-				if (!error?.response) {
-					toast.error("Something went wrong");
-				} else {
-					toast.error(error.response?.data?.message);
-				}
-			} finally {
-				setIsLoading(false);
-			}
+			setIsLoading(true);
+			privateAxios
+				.post("/login", formData)
+				.then((res) => {
+					if (!res.data.success) {
+						return toast.error("Login failed, Please try again");
+					}
+					const { user, accessToken } = res.data.data;
+					const admin: AdminType = {
+						username: user.username,
+						accessToken,
+						id: user.id,
+						avatar: user?.avatar,
+					};
+					setAdminState(admin);
+				})
+				.catch(errorHandler)
+				.finally(() => {
+					setIsLoading(false);
+				});
 		}
 	};
 
