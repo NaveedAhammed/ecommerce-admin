@@ -35,7 +35,9 @@ const ParentCategories = () => {
 			(pageNum - 1) * parentCategoriesPerPage,
 			(pageNum - 1) * parentCategoriesPerPage + parentCategoriesPerPage
 		)
-		.filter((cat) => cat.name.includes(filterQuery));
+		.filter((cat) =>
+			cat.name.toLowerCase().includes(filterQuery.toLowerCase())
+		);
 
 	const axiosPrivate = useAxiosPrivate();
 

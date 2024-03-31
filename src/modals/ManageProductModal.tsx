@@ -27,10 +27,21 @@ import { errorHandler } from "../utils/errorHandler";
 type InputFieldsState = {
 	title: boolean;
 	description: boolean;
+	brand: boolean;
 	price: boolean;
 	stock: boolean;
 	parentCategory: boolean;
 	childCategory: boolean;
+};
+
+const defaultState: InputFieldsState = {
+	title: false,
+	description: false,
+	brand: false,
+	price: false,
+	stock: false,
+	parentCategory: false,
+	childCategory: false,
 };
 
 const ManageProductModal = () => {
@@ -38,22 +49,10 @@ const ManageProductModal = () => {
 	const [isDragging, setIsDragging] = useState<boolean>(false);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [parentCat, setParentCat] = useState("");
-	const [hasInputFocused, setHasInputFocused] = useState<InputFieldsState>({
-		title: false,
-		description: false,
-		price: false,
-		stock: false,
-		parentCategory: false,
-		childCategory: true,
-	});
-	const [hasInputBlured, setHasInputBlured] = useState<InputFieldsState>({
-		title: false,
-		description: false,
-		price: false,
-		stock: false,
-		parentCategory: false,
-		childCategory: false,
-	});
+	const [hasInputFocused, setHasInputFocused] =
+		useState<InputFieldsState>(defaultState);
+	const [hasInputBlured, setHasInputBlured] =
+		useState<InputFieldsState>(defaultState);
 	const dispatch = useAppDispatch();
 	const { colors } = useAppSelector((state) => state.colors);
 	const { units } = useAppSelector((state) => state.units);
@@ -92,22 +91,8 @@ const ManageProductModal = () => {
 	};
 
 	const resetState = () => {
-		setHasInputBlured({
-			title: false,
-			description: false,
-			price: false,
-			parentCategory: false,
-			childCategory: false,
-			stock: false,
-		});
-		setHasInputFocused({
-			title: false,
-			description: false,
-			price: false,
-			parentCategory: false,
-			childCategory: false,
-			stock: false,
-		});
+		setHasInputBlured(defaultState);
+		setHasInputFocused(defaultState);
 		setParentCat("");
 		setImages([]);
 	};
@@ -495,20 +480,54 @@ const ManageProductModal = () => {
 					</Message>
 				)}
 			</div>
-			<div className="flex gap-4 items-start">
-				<input
-					type="checkbox"
-					name="featured"
-					id="featured"
-					className="mt-2 cursor-pointer"
-					defaultChecked={productData?.featured}
-				/>
-				<Label htmlFor="featured">
-					Featured <br />
-					<span className="text-xs">
-						This product will be displayed in featured section
-					</span>
-				</Label>
+			<div className="flex flex-col gap-2">
+				<div className="flex flex-col gap-1">
+					<Label htmlFor="brand">Brand</Label>
+					<Input
+						id="brand"
+						autoComplete="off"
+						defaultValue={productData?.brand}
+						name="brand"
+						required={true}
+						className="peer"
+						type="text"
+						onBlur={() =>
+							setHasInputBlured((prev) => ({
+								...prev,
+								brand: true,
+							}))
+						}
+						onFocus={() =>
+							setHasInputFocused((prev) => ({
+								...prev,
+								brand: true,
+							}))
+						}
+					/>
+					{hasInputFocused.brand && hasInputBlured.brand && (
+						<Message
+							error={true}
+							className="hidden peer-invalid:block"
+						>
+							Product brand is required
+						</Message>
+					)}
+				</div>
+				<div className="flex gap-4 items-start">
+					<input
+						type="checkbox"
+						name="featured"
+						id="featured"
+						className="cursor-pointer"
+						defaultChecked={productData?.featured}
+					/>
+					<Label htmlFor="featured">
+						Featured <br />
+						<span className="text-xs">
+							This product will be displayed in featured section
+						</span>
+					</Label>
+				</div>
 			</div>
 			<div
 				className={`flex flex-col col-span-1 ${

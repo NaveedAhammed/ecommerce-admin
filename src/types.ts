@@ -48,6 +48,7 @@ export type ProductType = {
 	_id: string;
 	title: string;
 	description: string;
+	brand: string;
 	price: number | string;
 	discount: number | string;
 	stock: number | string;

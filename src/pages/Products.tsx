@@ -36,7 +36,7 @@ const Products = () => {
 	const [filterQuery, setFilterQuery] = useState<string>("");
 
 	const filteredProducts = products?.filter((pro) =>
-		pro.title.includes(filterQuery)
+		pro.title.toLowerCase().includes(filterQuery.toLowerCase())
 	);
 
 	const axiosPrivate = useAxiosPrivate();

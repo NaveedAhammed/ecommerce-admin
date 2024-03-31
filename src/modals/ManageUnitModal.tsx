@@ -67,7 +67,7 @@ const ManageUnitModal = () => {
 					);
 				}
 				dispatch(setIsUnitModalOpen(false));
-				dispatch(addNewUnit(res.data.unit));
+				dispatch(addNewUnit(res.data.data.unit));
 				resetState();
 				return toast.success(res.data.message);
 			})

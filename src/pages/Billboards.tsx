@@ -37,7 +37,9 @@ const Billboards = () => {
 			(pageNum - 1) * billboardsPerPage,
 			(pageNum - 1) * billboardsPerPage + billboardsPerPage
 		)
-		.filter((bill) => bill.title.includes(filterQuery));
+		.filter((bill) =>
+			bill.title.toLowerCase().includes(filterQuery.toLowerCase())
+		);
 
 	const axiosPrivate = useAxiosPrivate();
 

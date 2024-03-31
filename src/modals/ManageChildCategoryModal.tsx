@@ -70,6 +70,7 @@ const ManageChildCategoryModal = () => {
 						"Child category creation failed, Please try again"
 					);
 				}
+				console.log(res.data);
 				dispatch(setIsChildCategoryModalOpen(false));
 				dispatch(addNewChildCategory(res.data.data.childCategory));
 				resetState();

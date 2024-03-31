@@ -37,7 +37,9 @@ const Colors = () => {
 			(pageNum - 1) * colorsPerPage,
 			(pageNum - 1) * colorsPerPage + colorsPerPage
 		)
-		.filter((color) => color.name.includes(filterQuery));
+		.filter((color) =>
+			color.name.toLowerCase().includes(filterQuery.toLowerCase())
+		);
 
 	const axiosPrivate = useAxiosPrivate();
 

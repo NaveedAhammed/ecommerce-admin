@@ -36,7 +36,9 @@ const Units = () => {
 			(pageNum - 1) * unitsPerPage,
 			(pageNum - 1) * unitsPerPage + unitsPerPage
 		)
-		.filter((unit) => unit.name.includes(filterQuery));
+		.filter((unit) =>
+			unit.name.toLowerCase().includes(filterQuery.toLowerCase())
+		);
 
 	const axiosPrivate = useAxiosPrivate();
 
