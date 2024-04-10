@@ -17,7 +17,7 @@ const initialState: ProductsState = {
 	productData: null,
 	editMode: false,
 	pageNum: 1,
-	productsPerPage: 5,
+	productsPerPage: 10,
 };
 
 const productSlice = createSlice({

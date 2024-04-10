@@ -86,6 +86,7 @@ const Products = () => {
 			axiosPrivate
 				.get(`/products?page=${pageNum}`)
 				.then((res) => {
+					console.log(res.data);
 					dispatch(
 						setProducts({
 							products: res.data.data.products,
@@ -174,9 +175,11 @@ const Products = () => {
 								</TRowData>
 								<TRowData>{product.stock}</TRowData>
 								<TRowData>
-									{correncyFormatter.format(
-										Number(product.price)
-									)}
+									{
+										correncyFormatter
+											.format(Number(product.price))
+											.split(".")[0]
+									}
 								</TRowData>
 								<TRowData>{product.discount}%</TRowData>
 								<TRowData>

@@ -67,7 +67,7 @@ const ManageColorModal = () => {
 					);
 				}
 				dispatch(setIsColorModalOpen(false));
-				dispatch(addNewColor(res.data.color));
+				dispatch(addNewColor(res.data.data.color));
 				resetState();
 				return toast.success(res.data.message);
 			})
@@ -89,7 +89,7 @@ const ManageColorModal = () => {
 				}
 				dispatch(setIsColorModalOpen(false));
 				dispatch(setColorData(null));
-				dispatch(updateColor(res.data.color));
+				dispatch(updateColor(res.data.data.color));
 				resetState();
 				return toast.success(res.data.message);
 			})

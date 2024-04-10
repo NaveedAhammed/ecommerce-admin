@@ -118,6 +118,7 @@ const Colors = () => {
 					<TRow>
 						<THeadData>Name</THeadData>
 						<THeadData>Value</THeadData>
+						<THeadData>Created At</THeadData>
 						<THeadData>Action</THeadData>
 					</TRow>
 				</THead>

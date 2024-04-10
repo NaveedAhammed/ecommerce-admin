@@ -1,5 +1,7 @@
 const Table: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-	return <table className="w-full border">{children}</table>;
+	return (
+		<table className="w-full border rounded-md shadow-md">{children}</table>
+	);
 };
 
 export const THead: React.FC<{ children: React.ReactNode }> = ({
@@ -33,7 +35,11 @@ export const TRowData: React.FC<{
 export const THeadData: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
-	return <th className="py-3 text-start px-4 border-b">{children}</th>;
+	return (
+		<th className="py-3 text-start px-4 border-b bg-slate-100">
+			{children}
+		</th>
+	);
 };
 
 export default Table;

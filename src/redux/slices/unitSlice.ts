@@ -16,7 +16,7 @@ const initialState: UnitsState = {
 	unitData: null,
 	editMode: false,
 	pageNum: 1,
-	unitsPerPage: 5,
+	unitsPerPage: 10,
 };
 
 const unitSlice = createSlice({

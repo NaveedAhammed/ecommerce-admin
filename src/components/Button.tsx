@@ -24,7 +24,7 @@ const Button: React.FC<ButtonProps> = ({
 	type = "button",
 }) => {
 	const buttonClasses =
-		"inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
+		"inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none transition duration-300 focus:shadow-inputFocus hover:shadow-inputHover disabled:pointer-events-none disabled:opacity-50";
 	let varientClasses;
 	let sizeClasses;
 	switch (varient) {

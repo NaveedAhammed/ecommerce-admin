@@ -16,7 +16,7 @@ const initialState: ColorsState = {
 	colorData: null,
 	editMode: false,
 	pageNum: 1,
-	colorsPerPage: 5,
+	colorsPerPage: 10,
 };
 
 const colorSlice = createSlice({

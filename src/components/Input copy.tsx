@@ -14,7 +14,7 @@ interface InputProps {
 	defaultValue?: string | number;
 }
 
-const Input: React.FC<InputProps> = ({
+const InputCopy: React.FC<InputProps> = ({
 	type,
 	name,
 	id,
@@ -30,7 +30,7 @@ const Input: React.FC<InputProps> = ({
 	defaultValue,
 }) => {
 	const inputClasses =
-		"flex w-full h-10 rounded-md border border-mutedForeground focus:border-blue bg-transparent px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-mutedForeground focus-visible:outline-none transition duration-300 focus:shadow-inputFocus hover:shadow-inputHover disabled:cursor-not-allowed disabled:opacity-50";
+		"flex w-full h-10 rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-mutedForeground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 	return (
 		<input
 			type={type}
@@ -50,4 +50,4 @@ const Input: React.FC<InputProps> = ({
 	);
 };
 
-export default Input;
+export default InputCopy;

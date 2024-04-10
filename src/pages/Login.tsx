@@ -58,6 +58,7 @@ const Login = () => {
 						avatar: user?.avatar,
 					};
 					setAdminState(admin);
+					localStorage.setItem("isLoggedIn", "true");
 				})
 				.catch(errorHandler)
 				.finally(() => {

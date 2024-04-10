@@ -16,7 +16,7 @@ const initialState: ParentCategoriesState = {
 	parentCategoryData: null,
 	editMode: false,
 	pageNum: 1,
-	parentCategoriesPerPage: 5,
+	parentCategoriesPerPage: 10,
 };
 
 const parentCategorySlice = createSlice({

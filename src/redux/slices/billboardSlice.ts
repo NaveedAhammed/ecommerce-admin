@@ -16,7 +16,7 @@ const initialState: BillboardState = {
 	billboardData: null,
 	editMode: false,
 	pageNum: 1,
-	billboardsPerPage: 5,
+	billboardsPerPage: 10,
 };
 
 const billboardSlice = createSlice({
