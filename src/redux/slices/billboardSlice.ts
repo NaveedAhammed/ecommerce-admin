@@ -32,11 +32,9 @@ const billboardSlice = createSlice({
 			);
 		},
 		updateBillboard(state, action) {
-			console.log(action.payload);
 			const indexOfBillboard = state.billboards.findIndex(
 				(item) => item._id === action.payload._id
 			);
-			console.log(indexOfBillboard);
 			state.billboards[indexOfBillboard] = action.payload;
 		},
 		setBillboardEditMode(state, action) {

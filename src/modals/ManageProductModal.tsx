@@ -223,7 +223,6 @@ const ManageProductModal = () => {
 		e.preventDefault();
 		const formElement = e.target as HTMLFormElement;
 		const isValid = formElement.checkValidity();
-		console.log(isValid);
 		if (!editMode && images.length === 0) {
 			return toast.error("Atleast one product image is required");
 		}
@@ -472,7 +471,7 @@ const ManageProductModal = () => {
 							description: true,
 						}))
 					}
-					className="flex peer resize-none w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-mutedForeground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+					className="flex peer resize-none w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-mutedForeground transition duration-300 focus:shadow-inputFocus hover:shadow-inputHover focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 				></textarea>
 				{hasInputFocused.description && hasInputBlured.description && (
 					<Message error={true} className="hidden peer-invalid:block">

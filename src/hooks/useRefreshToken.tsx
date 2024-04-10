@@ -10,7 +10,6 @@ const useRefreshToken = () => {
 	const refresh = async () => {
 		try {
 			const res = (await privateAxios.get("/refresh")).data;
-			console.log(res);
 			const { user, accessToken } = res.data;
 			const admin: AdminType = {
 				username: user.username,

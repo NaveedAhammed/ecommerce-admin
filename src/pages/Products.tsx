@@ -86,7 +86,6 @@ const Products = () => {
 			axiosPrivate
 				.get(`/products?page=${pageNum}`)
 				.then((res) => {
-					console.log(res.data);
 					dispatch(
 						setProducts({
 							products: res.data.data.products,

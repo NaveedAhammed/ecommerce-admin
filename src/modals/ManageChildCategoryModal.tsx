@@ -70,7 +70,6 @@ const ManageChildCategoryModal = () => {
 						"Child category creation failed, Please try again"
 					);
 				}
-				console.log(res.data);
 				dispatch(setIsChildCategoryModalOpen(false));
 				dispatch(addNewChildCategory(res.data.data.childCategory));
 				resetState();
@@ -168,6 +167,7 @@ const ManageChildCategoryModal = () => {
 						id: parentCategory?._id,
 						name: parentCategory?.name,
 					}))}
+					defaultValue={childCategoryData?.parentCategory._id}
 					required={true}
 					className="peer"
 					onBlur={() =>
