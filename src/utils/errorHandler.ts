@@ -13,7 +13,7 @@ export const errorHandler = (err: unknown) => {
 		} else if (!err?.response) {
 			toast.error("Something went wrong");
 		} else {
-			toast.error(err.response?.data?.message);
+			toast.error(err.response?.data.message);
 		}
 	}
 };
