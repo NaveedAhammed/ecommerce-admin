@@ -6,7 +6,7 @@ export const errorHandler = (err: unknown) => {
 	if (axios.isAxiosError<{ message: string }>(err)) {
 		if (err.code === "ERR_NETWORK") {
 			console.log("connection problems..");
-			toast.error("Network connection problem...");
+			return toast.error("Network connection problem...");
 		} else if (err.code === "ERR_CANCELED") {
 			console.log("connection canceled..");
 			toast.error("connection canceled..");

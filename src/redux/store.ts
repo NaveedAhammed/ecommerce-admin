@@ -5,6 +5,8 @@ import childCategoriesReducer from "./slices/childCategorySlice";
 import parentCategoriesReducer from "../redux/slices/parentCategorySlice";
 import colorsReducer from "../redux/slices/colorSlice";
 import billboardsReducer from "../redux/slices/billboardSlice";
+import ordersReducer from "../redux/slices/orderSlice";
+import usersReducer from "../redux/slices/userSlice";
 import { TypedUseSelectorHook, useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 
@@ -16,6 +18,8 @@ export const store = configureStore({
 		products: productsReducer,
 		billboards: billboardsReducer,
 		parentCategories: parentCategoriesReducer,
+		orders: ordersReducer,
+		users: usersReducer,
 	},
 });
 

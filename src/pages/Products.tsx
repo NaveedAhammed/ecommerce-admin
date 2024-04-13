@@ -27,6 +27,7 @@ import ControlledInput from "../components/ControlledInput";
 import Loader from "../components/Loader";
 import { correncyFormatter } from "../utils/correncyFormat";
 import { errorHandler } from "../utils/errorHandler";
+import multiColor from "../assets/multiColor.svg";
 
 const Products = () => {
 	const { products, pageNum, productsPerPage, totalProducts } =
@@ -136,7 +137,6 @@ const Products = () => {
 				<THead>
 					<TRow>
 						<THeadData>Title</THeadData>
-						<THeadData>Description</THeadData>
 						<THeadData>Stock</THeadData>
 						<THeadData>Price</THeadData>
 						<THeadData>Discount</THeadData>
@@ -167,12 +167,26 @@ const Products = () => {
 						{filteredProducts?.map((product) => (
 							<TRow key={product._id}>
 								<TRowData>
-									{product.title.slice(0, 10)}...
+									{product.title.slice(0, 15)}...
 								</TRowData>
 								<TRowData>
-									{product.description.slice(0, 15)}...
+									<div
+										className={`w-fit px-2 py-1 text-xs rounded-md flex items-center justify-center  ${
+											Number(product.stock) === 0
+												? "text-destructive bg-destructive/20"
+												: Number(product.stock) > 6
+												? "bg-green-600/20 text-green-600"
+												: "text-yellow-500 bg-yellow-500/20"
+										}`}
+									>
+										{product.stock},{" "}
+										{Number(product.stock) == 0
+											? "out of stock"
+											: Number(product.stock) > 6
+											? "in stock"
+											: "few left"}
+									</div>
 								</TRowData>
-								<TRowData>{product.stock}</TRowData>
 								<TRowData>
 									{
 										correncyFormatter
@@ -183,11 +197,34 @@ const Products = () => {
 								<TRowData>{product.discount}%</TRowData>
 								<TRowData>
 									{product?.unit
-										? `${product?.unit?.name}, ${product?.unit.value}`
+										? `${product?.unit?.name}, ${product?.unit.value}`.slice(
+												0,
+												10
+										  ) + "..."
 										: "--"}
 								</TRowData>
 								<TRowData>
-									{product.color?.name || "--"}
+									{product?.color ? (
+										<div className="flex items-center gap-2">
+											<div
+												className={`w-6 h-6 rounded-full border`}
+												style={{
+													backgroundColor: `${product.color.value}`,
+												}}
+											>
+												{product.color.value ===
+													"multiColor" && (
+													<img
+														src={multiColor}
+														alt=""
+														className="object-fill"
+													/>
+												)}
+											</div>
+										</div>
+									) : (
+										"--"
+									)}
 								</TRowData>
 								<TRowData>
 									{product.category
@@ -195,7 +232,15 @@ const Products = () => {
 										: "--"}
 								</TRowData>
 								<TRowData>
-									{product.featured ? "true" : "false"}
+									<div
+										className={`w-fit px-2 py-1 text-xs rounded-md flex items-center justify-center  ${
+											product.featured === true
+												? "bg-green-600/20 text-green-600"
+												: "text-blue bg-blue/20"
+										}`}
+									>
+										{product.featured ? "true" : "false"}
+									</div>
 								</TRowData>
 								<TRowData>
 									{dayjs(

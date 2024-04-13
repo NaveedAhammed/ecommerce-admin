@@ -68,3 +68,45 @@ export type AdminType = {
 	accessToken: string;
 	id: string;
 };
+
+export type UserType = {
+	_id: string;
+	username: string;
+	email: string;
+	gender?: string;
+	phone?: number;
+	avatar?: string;
+	role: string;
+	createdAt: string;
+};
+
+export type OrderType = {
+	_id: string;
+	shippingInfo: ShippingInfoType;
+	orderItems: OrderItemType[];
+	userId: UserType;
+	paymentInfo: string;
+	paidAt?: string;
+	taxPrice: number;
+	shippingPrice: number;
+	orderStatus: string;
+	orderedAt: string;
+	deliveredAt?: string;
+};
+
+type ShippingInfoType = {
+	name: string;
+	locality: string;
+	address: string;
+	city: string;
+	state: string;
+	pincode: number;
+	phone: number;
+};
+
+type OrderItemType = {
+	quantity: number;
+	productId: ProductType;
+	price: number;
+	discount: number;
+};

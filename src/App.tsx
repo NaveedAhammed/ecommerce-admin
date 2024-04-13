@@ -14,6 +14,7 @@ const Orders = lazy(() => import("./pages/Orders"));
 const Products = lazy(() => import("./pages/Products"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Units = lazy(() => import("./pages/Units"));
+const Users = lazy(() => import("./pages/Users"));
 
 const router = createBrowserRouter([
 	{
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
 							{
 								path: "/",
 								element: <Dashboard />,
+							},
+							{
+								path: "users",
+								element: <Users />,
 							},
 							{
 								path: "billboards",
