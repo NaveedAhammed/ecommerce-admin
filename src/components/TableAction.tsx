@@ -14,7 +14,7 @@ const TableAction: React.FC<TableActionProps> = ({ onDelete, onEdit }) => {
 	const menuRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		const handler = (e) => {
+		const handler = (e: any) => {
 			if (!menuRef.current?.contains(e.target)) {
 				setIsMenuOpen(false);
 			}
