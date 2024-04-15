@@ -103,29 +103,6 @@ const Orders = () => {
 				actionLabel="Add New"
 				actionLabelNotRequired
 			/>
-			{/* <div className="flex items-center gap-4 w-full mb-4">
-				<ControlledInput
-					autoComplete="off"
-					name="searchQuery"
-					type="text"
-					placeholder="Search"
-					className="max-w-[30rem]"
-					id="searchQuery"
-					value={filterQuery}
-					onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-						setFilterQuery(e.target.value)
-					}
-				/>
-				{filterQuery && (
-					<Button
-						varient="default"
-						size="default"
-						onClick={() => setFilterQuery("")}
-					>
-						Reset
-					</Button>
-				)}
-			</div> */}
 			<Table>
 				<THead>
 					<TRow>

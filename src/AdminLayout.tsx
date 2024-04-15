@@ -15,6 +15,7 @@ import { setBillboards } from "./redux/slices/billboardSlice";
 import { setParentCategories } from "./redux/slices/parentCategorySlice";
 import ManageChildCategoryModal from "./modals/ManageChildCategoryModal";
 import ManageParentCategoryModal from "./modals/ManageParentCategoryModal";
+import ManageOrderModal from "./modals/ManageOrderModal";
 
 const ManageProductModal = lazy(() => import("./modals/ManageProductModal"));
 
@@ -74,6 +75,7 @@ const AdminLayout = () => {
 					<ManageSizeModal />
 					<ManageBillboardModal />
 					<ManageChildCategoryModal />
+					<ManageOrderModal />
 					<Outlet />
 				</Suspense>
 			</main>
