@@ -65,7 +65,7 @@ const Orders = () => {
 	};
 
 	const handlePagination = (dir: string) => {
-		dispatch(setOrders({ products: [] }));
+		dispatch(setOrders({ orders: [] }));
 		if (dir === "previous") {
 			dispatch(setPageNum(pageNum - 1));
 		} else {
