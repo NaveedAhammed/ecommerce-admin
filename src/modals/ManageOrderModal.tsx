@@ -72,7 +72,7 @@ const ManageOrderModal = () => {
 				dispatch(setIsOrderModalOpen(false));
 				dispatch(setOrderData(null));
 				dispatch(setOrderEditMode(false));
-				dispatch(updateOrder(res.data.data.childCategory));
+				dispatch(updateOrder(res.data.data.order));
 				resetState();
 				return toast.success(res.data.message);
 			})
@@ -99,10 +99,10 @@ const ManageOrderModal = () => {
 	const body: React.ReactNode = (
 		<form className="min-w-[20rem]" noValidate onSubmit={handleOnSubmit}>
 			<div className="flex flex-col gap-1 w-full mb-6">
-				<Label htmlFor="parentCategoryId">Order Status</Label>
+				<Label htmlFor="orderStatus">Order Status</Label>
 				<Select
-					name="parentCategoryId"
-					id="parentCategoryId"
+					name="orderStatus"
+					id="orderStatus"
 					options={orderStatusTypes?.map((it) => ({
 						id: it,
 						name: it,

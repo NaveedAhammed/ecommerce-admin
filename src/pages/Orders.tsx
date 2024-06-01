@@ -192,9 +192,12 @@ const Orders = () => {
 								<TRowData>
 									<div
 										className={`w-fit px-2 py-1 text-xs rounded-md flex items-center justify-center  ${
-											order.orderStatus === "processing"
+											order.orderStatus === "not placed"
+												? "text-destructive bg-destructive/20"
+												: order.orderStatus ===
+												  "processing"
 												? "text-yellow-500 bg-yellow-500/20"
-												: order.paymentInfo ===
+												: order.orderStatus ===
 												  "shipped"
 												? "bg-green-600/20 text-green-600"
 												: "text-blue bg-blue/20"

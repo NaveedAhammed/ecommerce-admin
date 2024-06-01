@@ -21,8 +21,11 @@ export type ChildCategoryType = {
 export type BillboardType = {
 	_id: string;
 	title: string;
+	brand: string;
 	imageUrl?: string;
-	category: ParentCategoryType;
+	category: ChildCategoryType;
+	parentCategory: ParentCategoryType;
+	isActive: boolean;
 	createdAt: string;
 	updatedAt: string;
 };

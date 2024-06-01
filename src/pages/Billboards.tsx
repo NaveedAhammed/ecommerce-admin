@@ -24,6 +24,7 @@ import Button from "../components/Button";
 import { useState } from "react";
 import ControlledInput from "../components/ControlledInput";
 import Loader from "../components/Loader";
+import { GoDotFill } from "react-icons/go";
 
 const Billboards = () => {
 	const { billboards, pageNum, billboardsPerPage } = useAppSelector(
@@ -118,8 +119,11 @@ const Billboards = () => {
 					<TRow>
 						<THeadData>Image</THeadData>
 						<THeadData>Title</THeadData>
+						<THeadData>Brand</THeadData>
+						<THeadData>Category</THeadData>
 						<THeadData>Parent Category</THeadData>
-						<THeadData>Create At</THeadData>
+						<THeadData>State</THeadData>
+						<THeadData>Created At</THeadData>
 						<THeadData>Action</THeadData>
 					</TRow>
 				</THead>
@@ -145,7 +149,21 @@ const Billboards = () => {
 								/>
 							</TRowData>
 							<TRowData>{billboard.title}</TRowData>
+							<TRowData>{billboard.brand}</TRowData>
 							<TRowData>{billboard.category.name}</TRowData>
+							<TRowData>{billboard.parentCategory.name}</TRowData>
+							<TRowData>
+								<div className="flex items-center">
+									<GoDotFill
+										style={{
+											color: billboard.isActive
+												? "green"
+												: "red",
+										}}
+									/>
+									{billboard.isActive ? "active" : "inactive"}
+								</div>
+							</TRowData>
 							<TRowData>
 								{dayjs(
 									billboard?.createdAt?.split("T")[0]

@@ -38,10 +38,9 @@ const orderSlice = createSlice({
 		},
 		updateOrder(state, action) {
 			const indexOfProduct = state.orders.findIndex(
-				(item) => item._id === action.payload.order._id
+				(item) => item._id.toString() === action.payload._id.toString()
 			);
-			state.orders[indexOfProduct] = action.payload.order;
-			state.totalOrders = action.payload.totalOrders;
+			state.orders[indexOfProduct] = action.payload;
 		},
 		setOrderEditMode(state, action) {
 			state.editMode = action.payload;
